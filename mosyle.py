@@ -10,9 +10,6 @@ import requests
 import json
 import base64
 
-import ssl
-ssl._create_default_https_context = ssl._create_unverified_context
-
 
 MOSYLE_API_BASE_URL = "https://businessapi.mosyle.com/v1"
 

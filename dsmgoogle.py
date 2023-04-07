@@ -11,10 +11,12 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from googleapiclient import errors
 
 from pprint import pprint
 
 import keys
+import sys
 
 
 SCOPES = [
@@ -630,6 +632,35 @@ def create_user_google(userinfo):
 			print("New office? Contact the developer to have it added to the app.")
 			print("Location entered: " + userinfo['home_city'])
 
+	# Check for pre-existing user with the same email address
+	result = None
+	try:
+		result = service.users().get(userKey=userinfo['email_address']).execute()
+	except:
+		pass
+
+	# Double check for user email address first and confirm that the user
+	# wants to create a new account if an account is found
+	# (will need a new email address: userinfo['fname'][:2] + userinfo['lname'] )
+	if result is not None:
+		print("User email address already exists, suggest using a new address")
+		print("New suggested email address: " + userinfo['fname'][:2].lower() \
+			+ userinfo['lname'].lower() + userinfo['email_suffix'])
+		answer = input("Use this address? (y/n)")
+
+		if answer.lower() == "y":
+			print("fixing email address")
+			userinfo['username'] = userinfo['fname'][:2].lower() \
+			+ userinfo['lname'].lower().strip().replace(" ", "").replace("-", "")
+			userinfo['email_address'] = userinfo['username'] + userinfo['email_suffix'].lower()
+
+		elif answer.lower() == "n":
+			print("issue with address")
+			sys.exit("You can't create a new user with the same address")
+		else:
+			print("you can't do that")
+			sys.exit("User email already exists, please solve this issue")
+
 	user = {
 			"primaryEmail": userinfo['email_address'],
 			"name": {
@@ -650,12 +681,13 @@ def create_user_google(userinfo):
 			"includeInGlobalAddressList": True
 			}
 
-	# Double check for user email address first and confirm that the user
-	# wants to create a new account if an account is found
-	# (will need a new email address: userinfo['fname'][0-1] + userinfo['lname'] )
-
+	result = None
 	if userinfo['test_mode'] == False:
-		result = service.users().insert(body=user).execute()
+		try:
+			result = service.users().insert(body=user).execute()
+		except errors.HttpError:
+			pprint(errors.HttpError)
+			sys.exit()
 	
 		if 'id' in result:
 			userinfo['google_resp'] = "success"
@@ -679,7 +711,11 @@ def create_user_google(userinfo):
 	for group in userinfo['groups']:
 		# print("Group ID: " + group)
 		if userinfo['test_mode'] == False:
-			resp = service.members().insert(groupKey=group, body=member).execute()
+			try:
+				resp = service.members().insert(groupKey=group, body=member).execute()
+			except errors.HttpError as e:
+				pprint(e)
+			
 			group_resp.append(resp)
 
 		

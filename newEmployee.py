@@ -11,13 +11,36 @@ import sys
 
 def collect_name(userinfo):
 	print("Enter the new employee's information below.")
-	userinfo['fname'] = input("First name: ")
-	userinfo['lname'] = input("Last name: ")
+	userinfo['fname'] = input("First name: ").strip()
+	userinfo['lname'] = input("Last name: ").strip()
 	userinfo['username'] = userinfo['fname'][0].lower() + userinfo['lname'].lower()
+	userinfo = check_name(userinfo)
+	return userinfo
+
+def check_name(userinfo):
+	if userinfo['fname'].find(" ") >= 0:
+		print("Employee's first name contains spaces? (y/n)")
+		answer = input("")
+		if answer.lower().strip() != "y":
+			print("Fix the name")
+			sys.exit()
+
+	if userinfo['lname'].find(" ") >= 0:
+		print("Employee's last name contains spaces? (y/n)")
+		answer = input("")
+		if answer.lower().strip() != "y":
+			print("fix the name")
+			sys.exit()
+		else:
+			userinfo['username'] = userinfo['fname'][0].lower() + userinfo['lname'].lower().strip().replace(" ", "")
+
+	if userinfo['lname'].find("-") >= 0:
+		userinfo['username'] = userinfo['username'].replace("-", "")
+
 	return userinfo
 
 def collect_title(userinfo):
-	userinfo['title'] = input("Title: ")
+	userinfo['title'] = input("Title: ").strip()
 	return check_title(userinfo)
 
 def check_title(userinfo):
@@ -140,6 +163,18 @@ def check_city(userinfo):
 					os.system("clear")
 					sys.exit("Invalid input, program exiting")
 	else:
+		match userinfo['home_city'].lower():
+			case "atl" | "stl" | "nsh" | "mia" | "tpa":
+				None
+			case _:
+				print("Invalid city entered. Please enter a current Drive office location.")
+				print("You entered: " + userinfo['home_city'])
+				answer = input("Would you like to try again? (y/n)")
+				if answer.lower() == "y":
+					collect_city(userinfo)
+				else:
+					sys.exit("You have failed to input a correct city and the app cannot continue")
+
 		userinfo['city'] = userinfo['home_city']
 
 	if userinfo['home_city'].lower() == "stl" or userinfo['home_city'].lower() == "st. louis":
@@ -167,6 +202,7 @@ def display_user(userinfo):
 	print("make sure the information is correct before continuing.")
 	print("First name: " + userinfo['fname'])
 	print("Last name: " + userinfo['lname'])
+	print("Title: " + userinfo['title'])
 	print("Email address: " + userinfo['email_address'])
 	print("Home Office: " + userinfo['home_city'])
 	answer = input("Is all the above information correct? (y/n)")
