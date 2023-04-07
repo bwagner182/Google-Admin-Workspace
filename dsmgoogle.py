@@ -28,6 +28,7 @@ SCOPES = [
 
 
 def create_user_google(userinfo):
+	print("Creating user account in Google")
 	creds = None
 	# The file token.json stores the user's access and refresh tokens, and is
 	# created automatically when the authorization flow completes for the first
@@ -52,89 +53,7 @@ def create_user_google(userinfo):
 	userinfo['org_unit'] = ""
 	userinfo['groups'] = ['03l18frh32ojm10', '03o7alnk1bd3k5c']
 
-	if len(userinfo['title']) > 4:
-		match userinfo['title'].lower():
-			case "associate account executive":
-				userinfo['title_short'] = "aae"
-			case "associate director of strategy":
-				userinfo['title_short'] = "ados"
-			case "associate director of operations":
-				userinfo['title_short'] = "adoo"
-			case "account executive":
-				userinfo['title_short'] = "ae"
-			case "business developer":
-				userinfo['title_short'] = "bd"
-			case "community manager":
-				userinfo['title_short'] = "cm"
-			case "copywriter":
-				userinfo['title_short'] = "cw"
-			case "creative director":
-				userinfo['title_short'] = "cd"
-			case "developer":
-				userinfo['title_short'] = "dev"
-			case "director of analytics":
-				userinfo['title_short'] = "dam"
-			case "director of business development":
-				userinfo['title_short'] = "dbd"
-			case "director of copywriting":
-				userinfo['title_short'] = "dcw"
-			case "director of franchise":
-				userinfo['title_short'] = "dfch"
-			case "director of human resources":
-				userinfo['title_short'] = "dhr"
-			case "director of operations":
-				userinfo['title_short'] = "doo"
-			case "director of recruiting":
-				userinfo['title_short'] = "dor"
-			case "recruiter":
-				userinfo['title_short'] = "rcr"
-			case "director of social strategy":
-				userinfo['title_short'] = "dss"
-			case "director of videography":
-				userinfo['title_short'] = "dvp"
-			case "graphic designer":
-				userinfo['title_short'] = "gd"
-			case "leadership":
-				userinfo['title_short'] = "lead"
-			case "office admin":
-				userinfo['title_short'] = "oa"
-			case "photographer":
-				userinfo['title_short'] = "p/v"
-			case "videographer":
-				userinfo['title_short'] = "p/v"
-			case "project manager":
-				userinfo['title_short'] = "pm"
-			case "project coordinator":
-				userinfo['title_short'] = "pm"
-			case "web developer":
-				userinfo['title_short'] = "web"
-			case "marketing milk":
-				userinfo['title_short'] = "mm"
-			case "analytic manager":
-				userinfo['title_short'] = "am"
-			case "digital analyst":
-				userinfo['title_short'] = "am"
-			case _:
-				print("Unable to recognize the employee's title. Consult the application developer and give them the error below.")
-				print("ERROR: Incorrect title entered. Provided input: " + userinfo['title'])
-				exit(1)
-
-	city = ""
-	if len(userinfo['home_city']) > 3:
-		if userinfo['home_city'].lower() == "st. louis":
-			city = "stl"
-		elif userinfo['home_city'].lower() == "atlanta":
-			city = "atl"
-		elif userinfo['home_city'].lower() == "tampa":
-			city = "tpa"
-		elif userinfo['home_city'].lower() == "miami":
-			city = "mia"
-		elif userinfo['home_city'].lower() == "nashville" or userinfo['home_city'].lower() == "nash":
-			city = "nsh"
-	else:
-		city = userinfo['home_city']
-
-	match city:
+	match userinfo['city']:
 		case "atl":
 			userinfo['org_unit'] = userinfo['org_unit'] + "/Atlanta"
 			userinfo['groups'].append("01opuj5n4frlm0x")
@@ -735,14 +654,17 @@ def create_user_google(userinfo):
 	# wants to create a new account if an account is found
 	# (will need a new email address: userinfo['fname'][0-1] + userinfo['lname'] )
 
-	result = service.users().insert(body=user).execute()
+	if userinfo['test_mode'] == False:
+		result = service.users().insert(body=user).execute()
 	
-	if 'id' in result:
-		userinfo['google'] = "success"
+		if 'id' in result:
+			userinfo['google_resp'] = "success"
+		else:
+			userinfo['google_resp'] = "fail"
+			userinfo['google_error'] = result
+			return userinfo
 	else:
-		userinfo['google'] = "fail"
-		userinfo['google_error'] = result
-		return userinfo
+		userinfo['google_request'] = user
 
 	# put code here to loop through userinfo['groups'] and add the user to applicable userinfo['groups']
 	member = {
@@ -752,11 +674,14 @@ def create_user_google(userinfo):
 			"type": "USER",
 			"delivery_settings": "ALL_MAIL",
 		}
-	group_resp = []	
+	group_resp = []
+	print("Adding user to Google Groups")
 	for group in userinfo['groups']:
 		# print("Group ID: " + group)
-		resp = service.members().insert(groupKey=group, body=member).execute()
-		group_resp.append(resp)
+		if userinfo['test_mode'] == False:
+			resp = service.members().insert(groupKey=group, body=member).execute()
+			group_resp.append(resp)
+
 		
 	userinfo['google_groups_resp'] = group_resp
 	return userinfo

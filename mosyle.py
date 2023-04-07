@@ -17,6 +17,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 MOSYLE_API_BASE_URL = "https://businessapi.mosyle.com/v1"
 
 def create_user_mosyle(userinfo):
+	print("Creating user account in Mosyle")
 	auth = keys.MOSYLE_USERNAME + ":" + keys.MOSYLE_PASSWORD
 	auth = auth.encode("ascii")
 	auth = base64.b64encode(auth)
@@ -36,12 +37,18 @@ def create_user_mosyle(userinfo):
     	"type": "ENDUSER"
 	}
 
-	response = requests.post(MOSYLE_API_BASE_URL + "/users", json=body, headers=headers)
-	# resp_json = response.json()
-	if response['status'] != 'OK' :
-	 	# print("Error from Mosyle API:")
-	 	# print(result['error'])
-	 	return result['error']
-	else:
-	 	print("Mosyle user creation SUCCESS")
-	 	return True
+	if userinfo['test_mode'] == False:
+		response = requests.post(MOSYLE_API_BASE_URL + "/users", json=body, headers=headers)
+	
+		if response['status'] != 'OK' :
+		 	# print("Error from Mosyle API:")
+		 	# print(result['error'])
+		 	return result['error']
+		else:
+		 	print("Mosyle user creation SUCCESS")
+		 	userinfo['mosyle_resp'] = "success"
+		 	return userinfo
+
+	elif userinfo['test_mode'] == True:
+		userinfo['mosyle_request'] = body
+		return userinfo
