@@ -14,7 +14,10 @@ import base64
 MOSYLE_API_BASE_URL = "https://businessapi.mosyle.com/v1"
 
 def create_user_mosyle(userinfo):
+	"""Create a new user account in Mosyle"""
 	print("Creating user account in Mosyle")
+
+	# Set up authorization for the API
 	auth = keys.MOSYLE_USERNAME + ":" + keys.MOSYLE_PASSWORD
 	auth = auth.encode("ascii")
 	auth = base64.b64encode(auth)
@@ -35,17 +38,22 @@ def create_user_mosyle(userinfo):
 	}
 
 	if userinfo['test_mode'] == False:
-		response = requests.post(MOSYLE_API_BASE_URL + "/users", json=body, headers=headers)
+		try:
+			response = requests.post(MOSYLE_API_BASE_URL + "/users", json=body, headers=headers)
+		except:
+			sys.exit("There was an issue with the Mosyle request")
 	
+		# Make sure there are no other errors with the submission
 		if response['status'] != 'OK' :
-		 	# print("Error from Mosyle API:")
-		 	# print(result['error'])
-		 	return result['error']
+			userinfo['mosyle_resp'] = "fail"
+		 	return userinfo
 		else:
+			# User successfully created
 		 	print("Mosyle user creation SUCCESS")
 		 	userinfo['mosyle_resp'] = "success"
 		 	return userinfo
 
 	elif userinfo['test_mode'] == True:
+		# Test mode enabled, store mosyle request for display and debugging
 		userinfo['mosyle_request'] = body
 		return userinfo

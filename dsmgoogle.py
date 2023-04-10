@@ -30,6 +30,7 @@ SCOPES = [
 
 
 def create_user_google(userinfo):
+	"""Create new user account in Google for the employee"""
 	print("Creating user account in Google")
 	creds = None
 	# The file token.json stores the user's access and refresh tokens, and is
@@ -55,6 +56,7 @@ def create_user_google(userinfo):
 	userinfo['org_unit'] = ""
 	userinfo['groups'] = ['03l18frh32ojm10', '03o7alnk1bd3k5c']
 
+	# Match the city and title to the appropriate OU and Groups
 	match userinfo['city']:
 		case "atl":
 			userinfo['org_unit'] = userinfo['org_unit'] + "/Atlanta"
@@ -632,16 +634,17 @@ def create_user_google(userinfo):
 			print("New office? Contact the developer to have it added to the app.")
 			print("Location entered: " + userinfo['home_city'])
 
-	# Check for pre-existing user with the same email address
+	
+	# Double check for user email address first and confirm that the user
+	# wants to create a new account if an account is found
+	# (will need a new email address: userinfo['fname'][:2] + userinfo['lname'] )
 	result = None
 	try:
 		result = service.users().get(userKey=userinfo['email_address']).execute()
 	except:
 		pass
 
-	# Double check for user email address first and confirm that the user
-	# wants to create a new account if an account is found
-	# (will need a new email address: userinfo['fname'][:2] + userinfo['lname'] )
+	# Email address found, suggest a new address
 	if result is not None:
 		print("User email address already exists, suggest using a new address")
 		print("New suggested email address: " + userinfo['fname'][:2].lower() \
@@ -685,20 +688,22 @@ def create_user_google(userinfo):
 	if userinfo['test_mode'] == False:
 		try:
 			result = service.users().insert(body=user).execute()
-		except errors.HttpError:
-			pprint(errors.HttpError)
+		except errors.HttpError as e:
+			pprint(e)
 			sys.exit()
 	
 		if 'id' in result:
+			# User creation successful, result contains user object from Google
 			userinfo['google_resp'] = "success"
 		else:
 			userinfo['google_resp'] = "fail"
 			userinfo['google_error'] = result
 			return userinfo
 	else:
+		# Test mode enabled, store Google request for display and debugging
 		userinfo['google_request'] = user
 
-	# put code here to loop through userinfo['groups'] and add the user to applicable userinfo['groups']
+	# Set up group member request body
 	member = {
 			"kind": "admin#directory#member",
 			"email": userinfo['email_address'],
@@ -708,6 +713,7 @@ def create_user_google(userinfo):
 		}
 	group_resp = []
 	print("Adding user to Google Groups")
+	# Loop through group keys from userinfo and add employee to Google Groups
 	for group in userinfo['groups']:
 		# print("Group ID: " + group)
 		if userinfo['test_mode'] == False:
@@ -718,6 +724,5 @@ def create_user_google(userinfo):
 			
 			group_resp.append(resp)
 
-		
 	userinfo['google_groups_resp'] = group_resp
 	return userinfo
