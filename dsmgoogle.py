@@ -767,7 +767,7 @@ def find_user(userinfo):
 def terminate_user(userinfo):
     user = find_user(userinfo)
     user['password'] = generate_password()
-    print("user's new password: " + user['password'])
+    print("User's new Gmail password: " + user['password'])
     user['changePasswordAtNextLogin'] = True
     if userinfo['test_mode'] == False:
         response = service.users().update(userKey=userinfo['email_address'], body=user).execute()

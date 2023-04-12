@@ -140,5 +140,7 @@ def terminate_user(username):
     asset = get_asset(asset_id)
     response = update_asset(asset, "term")
 
+    print("User's device has been updated in Reftab")
+
     return response
 
