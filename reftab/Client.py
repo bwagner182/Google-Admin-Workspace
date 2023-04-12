@@ -58,9 +58,29 @@ class ReftabClient():
         else:
           return response
       
-    def get(self, endpoint, id=None):
+    def get(self, endpoint, id=None, query=None, limit=None, offset=None, loan_uid=None, loan_id=None, asset_id=None):
         if (id):
           endpoint += '/' + id
+        elif (query):
+          endpoint += '?q=' + query
+          if (limit):
+            endpoint += '&limit=' + str(limit)
+          if (offset):
+            endpoint += '&offset=' + str(offset)
+
+        elif (loan_uid):
+          endpoint += '?lnid=' + loan_uid
+          if (limit):
+            endpoint += '&limit=' + str(limit)
+          if (offset):
+            endpoint += '&offset=' + str(offset)
+        elif (loan_id):
+            endpoint += '?lnid=' + str(loan_id)
+            if (limit):
+              endpoint += '&limit=' + str(limit)
+            if (offset):
+              endpoint += '&offset' + str(offset)
+  
         return self.__request('GET', endpoint)
         
     def put(self, endpoint, id, body):
