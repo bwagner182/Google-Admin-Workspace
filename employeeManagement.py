@@ -262,7 +262,7 @@ def new_employee(userinfo):
 def term_employee(userinfo):
     userinfo = collect_name(userinfo)
     userinfo = collect_email(userinfo)
-    dsmreftab.terminate_user(userinfo['username'])
+    dsmreftab.terminate_user(userinfo)
     dsmgoogle.terminate_user(userinfo)
     sys.exit()
 

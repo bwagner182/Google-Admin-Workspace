@@ -54,7 +54,7 @@ def create_user_reftab(userinfo):
 def search_users(username):
     """
     Seach Reftab for user account by username
-    username    str     this should be the username to search
+    username    str     any query, but username or email is best
 
     Return
     response    list    an array of user objects that match the search
@@ -131,11 +131,11 @@ def update_asset_status(asset, status):
                             'loanability': 0,
                             'name': 'Needs shipped home'
                         }
-        asset['statid'] = 65952
+        asset['statid'] = 65952 # ID for status label in Reftab
     response = client.put('assets', asset['aid'], body=asset)
     return response
 
-def terminate_user(username):
+def terminate_user(userinfo):
     """
     Used when terminating an employee, updates computer due date to today
     and changes the status label for the computer.
@@ -145,13 +145,24 @@ def terminate_user(username):
     response    dict    this is the response from the API when updating the asset
                         (not the loan due date, but the due date will be shown on success)
     """
-    user = search_users(username)[0]
+    user = search_users(userinfo['username'])
 
     if len(user) > 1:
         sys.exit("Multiple users match that search, please provide the unique username")
     elif len(user) == 0:
         sys.exit("No users matched the search, please correct the username")
+    else:
+        user = user[0]
 
+    if user['name'].lower() != userinfo['fname'] + " " + userinfo['lname']:
+        os.system("clear")
+        print("The user account returned does not match, try searching by email? (y/n)")
+        answer = input().strip().lower()
+
+        if answer == "n":
+            sys.exit("User account returned did not match given name")
+        elif answer == "y":
+            user = search_users(userinfo['email_address'])[0]
 
     try:
         userid = user['lnid']
@@ -185,11 +196,14 @@ def terminate_user(username):
             }
 
     # update the loan status
-    client.put('loans', id=str(loan_id), body=body)
+    if userinfo['test_mode'] == False:
+        client.put('loans', id=str(loan_id), body=body)
 
     # update the asset status label
     asset = get_asset(asset_id)
-    response = update_asset_status(asset, "term")
+    
+    if userinfo['test_mode'] == False:
+        response = update_asset_status(asset, "term")
 
     print("User's device has been updated in Reftab")
 
