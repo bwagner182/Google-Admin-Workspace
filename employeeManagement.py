@@ -14,7 +14,7 @@ def collect_name(userinfo):
     print("Enter the new employee's information below.")
     userinfo['fname'] = input("First name: ").strip()
     userinfo['lname'] = input("Last name: ").strip()
-    userinfo['username'] = userinfo['fname'][0].lower() + userinfo['lname'].lower()
+    userinfo['username'] = userinfo['fname'][0].lower() + userinfo['lname'].lower().replace('\'', '')
     userinfo = check_name(userinfo)
     return userinfo
 
