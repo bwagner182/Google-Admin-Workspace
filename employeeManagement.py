@@ -11,6 +11,13 @@ import helpfile
 
 
 def collect_name(userinfo):
+    """
+    Collect the employee's first and last name for their account
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     print("Enter the new employee's information below.")
     userinfo['fname'] = input("First name: ").strip()
     userinfo['lname'] = input("Last name: ").strip()
@@ -19,6 +26,14 @@ def collect_name(userinfo):
     return userinfo
 
 def check_name(userinfo):
+    """
+    Sanitize the name for spaces or other characters we can't include
+    in usernames or emails
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object   
+    """
     if userinfo['fname'].find(" ") >= 0:
         print("Employee's first name contains spaces? (y/n)")
         answer = input("")
@@ -41,14 +56,36 @@ def check_name(userinfo):
     return userinfo
 
 def collect_email(userinfo):
+    """
+    Adds the email account to the user object
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     userinfo['email_address'] = input("Email address: ").strip().lower()
     return userinfo
 
 def collect_title(userinfo):
+    """
+    Adds the user's title to the user dict
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     userinfo['title'] = input("Title: ").strip()
     return check_title(userinfo)
 
 def check_title(userinfo):
+    """
+    Make sure the title matches an available title at Drive to ensure
+    proper grouping and OU placement
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     if len(userinfo['title']) > 4:
         match userinfo['title'].lower():
             case "associate account executive":
@@ -134,10 +171,24 @@ def check_title(userinfo):
     return userinfo
 
 def collect_city(userinfo):
+    """
+    Adds the employee's home city to the user object
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     userinfo['home_city'] = input("Home office: ")
     return check_city(userinfo)
 
 def check_city(userinfo):
+    """
+    Confirm that the entered city matches a city with a Drive offive
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     userinfo['city'] = userinfo['home_city']
     if len(userinfo['home_city']) > 3:
         match userinfo['home_city'].lower():
@@ -196,12 +247,26 @@ def check_city(userinfo):
     return userinfo
 
 def collect_info(userinfo):
+    """
+    Run the collection functions
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     userinfo = collect_name(userinfo)
     userinfo = collect_title(userinfo)
     userinfo = collect_city(userinfo)
     return userinfo
 
 def display_user(userinfo):
+    """
+    Display userinfo before submisison and allow for correction
+    userinfo    dict    user object
+
+    Returns
+    bool
+    """
     os.system("clear")
     print("This information will be used to create the new employee's accounts,")
     print("make sure the information is correct before continuing.")
@@ -227,9 +292,16 @@ def display_user(userinfo):
         sys.exit("Invalid input, program exiting")
 
 def new_employee(userinfo):
+    """
+    Initialize the process of a new employee, this calls the other functions
+    userinfo    dict    user object
+    """
     userinfo = collect_info(userinfo)
     resp = display_user(userinfo)
-     
+    
+    if resp != True:
+        sys.exit("Error with userinfo displayed, display_user() returned 'false'")
+
     userinfo = dsmgoogle.create_user_google(userinfo)
     userinfo = mosyle.create_user_mosyle(userinfo)
     userinfo = dsmreftab.create_user_reftab(userinfo)
@@ -260,9 +332,13 @@ def new_employee(userinfo):
         pprint(userinfo, width=75)
 
 def term_employee(userinfo):
+    """
+    Runs all the termination functions from each platform
+    userinfo    dict    user object
+    """
     userinfo = collect_name(userinfo)
     userinfo = collect_email(userinfo)
-    dsmreftab.terminate_user(userinfo['username'])
+    dsmreftab.terminate_user(userinfo)
     dsmgoogle.terminate_user(userinfo)
     sys.exit()
 

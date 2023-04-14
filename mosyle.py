@@ -14,7 +14,14 @@ import base64
 MOSYLE_API_BASE_URL = "https://businessapi.mosyle.com/v1"
 
 def create_user_mosyle(userinfo):
-    """Create a new user account in Mosyle"""
+    """
+    Create a new user account in Mosyle
+    userinfo    dict    user object
+
+    Returns
+    response    dict    user object from Mosyle
+    userinfo    dict    user object (on test or fail)
+    """
     print("Creating user account in Mosyle")
 
     # Set up authorization for the API
