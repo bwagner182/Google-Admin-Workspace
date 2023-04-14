@@ -19,7 +19,13 @@ client = ReftabClient(
     )
 
 def create_user_reftab(userinfo):
-    """Create a new user account in Reftab for the employee"""
+    """
+    Create a new user account in Reftab for the employee
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     print("Creating user account in Reftab")
     # Initialize the request body
     body = {

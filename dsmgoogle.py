@@ -51,7 +51,13 @@ if not creds or not creds.valid:
 service = build('admin', 'directory_v1', credentials=creds)
 
 def create_user_google(userinfo):
-    """Create new user account in Google for the employee"""
+    """
+    Create new user account in Google for the employee
+    userinfo    dict    user object
+
+    Returns
+    userinfo    dict    user object
+    """
     print("Creating user account in Google")
 
     # Build out user object
@@ -745,12 +751,26 @@ def create_user_google(userinfo):
     return userinfo
 
 def generate_password(length=10):
+    """
+    Generate a password at a given length
+    length      int     length for the password
+
+    Returns
+    password    str     generated password
+    """
     alphabet = string.ascii_letters + string.digits + string.punctuation
     password = ''.join(secrets.choice(alphabet) for i in range(length))
     password = password.replace('`', secrets.choice(alphabet)).replace('"', secrets.choice(alphabet)).replace('\'', secrets.choice(alphabet))
     return password
 
 def find_user(userinfo):
+    """
+    Seach users by email address
+    userinfo    dict    user object
+
+    Returns
+    user        dict    user object
+    """
     try:
         user = service.users().get(userKey=userinfo['email_address']).execute()
     except errors.HttpError as e:
@@ -765,6 +785,15 @@ def find_user(userinfo):
     return user
 
 def terminate_user(userinfo):
+    """
+    Change the password for the user account to lock the terminated employee
+    out of the account
+    userinfo    dict    user object
+
+    Returns
+    response    dict    Google user object
+    userinfo    dict    user object (only when test mode enabled)
+    """
     user = find_user(userinfo)
     user['password'] = generate_password()
     print("User's new Gmail password: " + user['password'])
