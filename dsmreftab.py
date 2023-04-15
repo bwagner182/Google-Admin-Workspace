@@ -13,7 +13,7 @@ import sys
 import keys
 
 # Set up API authorization
-client = ReftabClient(  
+client = ReftabClient(
     publicKey=keys.REFTAB_PUBLIC_KEY,
     secretKey=keys.REFTAB_SECRET_KEY
     )
@@ -160,7 +160,7 @@ def terminate_user(userinfo):
     else:
         user = user[0]
 
-    if user['name'].lower() != userinfo['fname'] + " " + userinfo['lname']:
+    if user['name'].lower() != userinfo['fname'].lower() + " " + userinfo['lname'].lower():
         os.system("clear")
         print("The user account returned does not match, try searching by email? (y/n)")
         answer = input().strip().lower()
@@ -171,25 +171,29 @@ def terminate_user(userinfo):
             user = search_users(userinfo['email_address'])[0]
 
     try:
-        userid = user['lnid']
+        userid = user['lid']
     except KeyError:
-        sys.exit("No matching username, check the spelling")
+        userid = user['uid']
 
     
     loans = get_loans(userid=userid)
+    try:
+        for loan in loans:
+            category = loan['categoryName']
+            if "MacBook" in category or "iMac" in category:
+                loan_id = loan['lid']
 
-    for loan in loans:
-        category = loan['categoryName']
-        if "MacBook" in category or "iMac" in category:
-            loan_id = loan['lid']
+            if "MacBook" in category:
+                asset_id = loan['aid']
 
-        if "MacBook" in category:
-            asset_id = loan['aid']
-
-        if "iMac" in category:
-            status = "in"
-        else:
-            status = "out"
+            if "iMac" in category:
+                status = "in"
+            else:
+                status = "out"
+    except TypeError:
+        print("Sorry, no registered devices for this user")
+        # exit the function and move on
+        return
 
     # Update device due date to TODAY at 5PM
     due_date = datetime.today().strftime('%Y-%m-%d') + "T22:00:00Z"

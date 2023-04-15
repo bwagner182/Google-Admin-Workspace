@@ -69,7 +69,7 @@ class ReftabClient():
                 endpoint += '&offset=' + str(offset)
 
         elif (loan_uid):
-            endpoint += '?lnid=' + loan_uid
+            endpoint += '?loan_uid=' + str(loan_uid)
             if (limit):
                 endpoint += '&limit=' + str(limit)
             if (offset):

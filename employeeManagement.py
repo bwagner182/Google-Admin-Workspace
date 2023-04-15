@@ -1,13 +1,20 @@
+""" Employee Management Application for Drive Social Media
 
-from pprint import pprint
+This is used to add/remove employees from Drive systems
+
+Attributes:
+    if __name__: check to see if user is running application for a new user or to term one
+"""
 import os
 import sys
 
+from pprint import pprint
+
+import dsmgoogle
+import dsmreftab
+import helpfile
 import keys
 import mosyle
-import dsmreftab
-import dsmgoogle
-import helpfile
 
 
 def collect_name(userinfo):
