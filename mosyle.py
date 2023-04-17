@@ -46,7 +46,7 @@ def create_user_mosyle(userinfo):
 
     if userinfo['test_mode'] == False:
         try:
-            response = requests.post(MOSYLE_API_BASE_URL + "/users", json=body, headers=headers)
+            response = requests.post(MOSYLE_API_BASE_URL + "/users", json=body, headers=headers).json()
         except:
             sys.exit("There was an issue with the Mosyle request")
     
