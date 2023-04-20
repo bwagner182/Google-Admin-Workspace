@@ -5,6 +5,7 @@ better testing and code readability
 
 from __future__ import print_function
 
+import pandas as pd
 import os.path
 
 from google.auth.transport.requests import Request
@@ -49,6 +50,10 @@ if not creds or not creds.valid:
         token.write(creds.to_json())
 
 service = build('admin', 'directory_v1', credentials=creds)
+
+def addToClipBoard(text):
+    df=pd.DataFrame([text])
+    df.to_clipboard(index=False,header=False)
 
 def create_user_google(userinfo):
     """
@@ -796,6 +801,7 @@ def terminate_user(userinfo):
     """
     user = find_user(userinfo)
     user['password'] = generate_password()
+    addToClipBoard(user['password'])
     print("User's new Gmail password: " + user['password'])
     user['changePasswordAtNextLogin'] = True
     if userinfo['test_mode'] == False:
