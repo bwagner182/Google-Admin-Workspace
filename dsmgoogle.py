@@ -5,6 +5,7 @@ better testing and code readability
 
 from __future__ import print_function
 
+import pandas as pd
 import os.path
 
 from google.auth.transport.requests import Request
@@ -49,6 +50,12 @@ if not creds or not creds.valid:
         token.write(creds.to_json())
 
 service = build('admin', 'directory_v1', credentials=creds)
+
+
+def addToClipBoard(text):
+    df = pd.DataFrame([text])
+    df.to_clipboard(index=False, header=False)
+
 
 def create_user_google(userinfo):
     """
@@ -657,7 +664,6 @@ def create_user_google(userinfo):
             print("New office? Contact the developer to have it added to the app.")
             print("Location entered: " + userinfo['home_city'])
 
-    
     # Double check for user email address first and confirm that the user
     # wants to create a new account if an account is found
     # (will need a new email address: userinfo['fname'][:2] + userinfo['lname'] )
@@ -670,15 +676,18 @@ def create_user_google(userinfo):
     # Email address found, suggest a new address
     if result is not None:
         print("User email address already exists, suggest using a new address")
-        print("New suggested email address: " + userinfo['fname'][:2].lower() \
-            + userinfo['lname'].lower() + userinfo['email_suffix'])
+        print("New suggested email address: " + userinfo['fname'][:2].lower() +
+            userinfo['lname'].lower() + userinfo['email_suffix'])
         answer = input("Use this address? (y/n)")
 
         if answer.lower() == "y":
             print("fixing email address")
             userinfo['username'] = userinfo['fname'][:2].lower() \
-            + userinfo['lname'].lower().strip().replace(" ", "").replace("-", "")
-            userinfo['email_address'] = userinfo['username'] + userinfo['email_suffix'].lower()
+                + userinfo['lname'].lower().strip().replace(
+                    " ",
+                    "").replace("-", "")
+            userinfo['email_address'] = userinfo['username'] +\
+                userinfo['email_suffix'].lower()
 
         elif answer.lower() == "n":
             print("issue with address")
@@ -688,33 +697,33 @@ def create_user_google(userinfo):
             sys.exit("User email already exists, please solve this issue")
 
     user = {
-            "primaryEmail": userinfo['email_address'],
-            "name": {
-                "givenName": userinfo['fname'],
-                "familyName": userinfo['lname']
-                },
-            "suspended": False,
-            "password": keys.EMPLOYEE_PASSWORD,
-            "changePasswordAtNextLogin": True,
-            "ipWhitelisted": False,
-            "ims": [],
-            "emails": [],
-            "addresses": [],
-            "externalIds": [],
-            "organizations": [],
-            "phones": [],
-            "orgUnitPath": userinfo['org_unit'],
-            "includeInGlobalAddressList": True
-            }
+        "primaryEmail": userinfo['email_address'],
+        "name": {
+            "givenName": userinfo['fname'],
+            "familyName": userinfo['lname']
+            },
+        "suspended": False,
+        "password": keys.EMPLOYEE_PASSWORD,
+        "changePasswordAtNextLogin": True,
+        "ipWhitelisted": False,
+        "ims": [],
+        "emails": [],
+        "addresses": [],
+        "externalIds": [],
+        "organizations": [],
+        "phones": [],
+        "orgUnitPath": userinfo['org_unit'],
+        "includeInGlobalAddressList": True
+    }
 
     result = None
-    if userinfo['test_mode'] == False:
+    if userinfo['test_mode'] is False:
         try:
             result = service.users().insert(body=user).execute()
         except errors.HttpError as e:
             pprint(e)
             sys.exit()
-    
+
         if 'id' in result:
             # User creation successful, result contains user object from Google
             userinfo['google_resp'] = "success"
@@ -728,27 +737,31 @@ def create_user_google(userinfo):
 
     # Set up group member request body
     member = {
-            "kind": "admin#directory#member",
-            "email": userinfo['email_address'],
-            "role": "MEMBER",
-            "type": "USER",
-            "delivery_settings": "ALL_MAIL",
-        }
+        "kind": "admin#directory#member",
+        "email": userinfo['email_address'],
+        "role": "MEMBER",
+        "type": "USER",
+        "delivery_settings": "ALL_MAIL",
+    }
     group_resp = []
     print("Adding user to Google Groups")
     # Loop through group keys from userinfo and add employee to Google Groups
     for group in userinfo['groups']:
         # print("Group ID: " + group)
-        if userinfo['test_mode'] == False:
+        if userinfo['test_mode'] is False:
             try:
-                resp = service.members().insert(groupKey=group, body=member).execute()
+                resp = service.members().insert(
+                    groupKey=group,
+                    body=member
+                ).execute()
             except errors.HttpError as e:
                 pprint(e)
-            
+
             group_resp.append(resp)
 
     userinfo['google_groups_resp'] = group_resp
     return userinfo
+
 
 def generate_password(length=10):
     """
@@ -760,8 +773,15 @@ def generate_password(length=10):
     """
     alphabet = string.ascii_letters + string.digits + string.punctuation
     password = ''.join(secrets.choice(alphabet) for i in range(length))
-    password = password.replace('`', secrets.choice(alphabet)).replace('"', secrets.choice(alphabet)).replace('\'', secrets.choice(alphabet))
+    password = password.replace(
+        '`',
+        secrets.choice(alphabet)).replace(
+        '"',
+        secrets.choice(alphabet)).replace(
+        '\'',
+        secrets.choice(alphabet))
     return password
+
 
 def find_user(userinfo):
     """
@@ -784,6 +804,7 @@ def find_user(userinfo):
 
     return user
 
+
 def terminate_user(userinfo):
     """
     Change the password for the user account to lock the terminated employee
@@ -796,10 +817,14 @@ def terminate_user(userinfo):
     """
     user = find_user(userinfo)
     user['password'] = generate_password()
+    addToClipBoard(user['password'])
     print("User's new Gmail password: " + user['password'])
     user['changePasswordAtNextLogin'] = True
-    if userinfo['test_mode'] == False:
-        response = service.users().update(userKey=userinfo['email_address'], body=user).execute()
+    if userinfo['test_mode'] is False:
+        response = service.users().update(
+            userKey=userinfo['email_address'],
+            body=user
+        ).execute()
     else:
         userinfo['google_user_object'] = user
         return userinfo

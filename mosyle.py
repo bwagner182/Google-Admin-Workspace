@@ -3,15 +3,15 @@ This file will hold my work with the Mosyle API to allow for
 better testing and code readability
 """
 
-from pprint import pprint
 import keys
 
 import requests
-import json
 import base64
+import sys
 
 
 MOSYLE_API_BASE_URL = "https://businessapi.mosyle.com/v1"
+
 
 def create_user_mosyle(userinfo):
     """
@@ -30,9 +30,9 @@ def create_user_mosyle(userinfo):
     auth = base64.b64encode(auth)
     auth = auth.decode("ascii")
     headers = {
-    'Authorization':'Basic ' + auth,
-    'Content-Type':'application/json',
-    'accesstoken': keys.MOSYLE_API_TOKEN
+        'Authorization': 'Basic ' + auth,
+        'Content-Type': 'application/json',
+        'accesstoken': keys.MOSYLE_API_TOKEN
     }
 
     # Create the body of the request (refer to mosyle docs for body composition)
@@ -44,14 +44,18 @@ def create_user_mosyle(userinfo):
         "type": "ENDUSER"
     }
 
-    if userinfo['test_mode'] == False:
+    if userinfo['test_mode'] is False:
         try:
-            response = requests.post(MOSYLE_API_BASE_URL + "/users", json=body, headers=headers)
+            response = requests.post(
+                MOSYLE_API_BASE_URL + "/users",
+                json=body,
+                headers=headers
+            ).json()
         except:
             sys.exit("There was an issue with the Mosyle request")
-    
+
         # Make sure there are no other errors with the submission
-        if response['status'] != 'OK' :
+        if response['status'] != 'OK':
             userinfo['mosyle_resp'] = "fail"
             return userinfo
         else:
@@ -60,7 +64,7 @@ def create_user_mosyle(userinfo):
             userinfo['mosyle_resp'] = "success"
             return userinfo
 
-    elif userinfo['test_mode'] == True:
+    elif userinfo['test_mode'] is True:
         # Test mode enabled, store mosyle request for display and debugging
         userinfo['mosyle_request'] = body
         return userinfo
