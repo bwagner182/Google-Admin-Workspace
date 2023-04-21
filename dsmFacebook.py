@@ -29,7 +29,8 @@ def get_access_token(businessManager):
     """
     uri = "https://graph.facebook.com/oauth/access_token"
     uri = uri + "?client_id=" + keys.BUSINESS_IDS[businessManager]['app_id']
-    uri = uri + "&client_secret=" + keys.BUSINESS_IDS[businessManager]['app_secret']
+    uri = uri + "&client_secret=" +\
+        keys.BUSINESS_IDS[businessManager]['app_secret']
     uri = uri + "&grant_type=client_credentials"
 
     response = requests.get(uri).json()
@@ -145,7 +146,7 @@ def fbdelete(userinfo):
 
         # delete the user
         resp = []
-        resp.append(business_manager_user_delete(user))
+        resp.append(business_manager_user_delete(user, key))
         print("User removed from Business Manager " + key)
 
     return resp
