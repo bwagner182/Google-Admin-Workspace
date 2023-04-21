@@ -18,6 +18,7 @@ client = ReftabClient(
     secretKey=keys.REFTAB_SECRET_KEY
     )
 
+
 def create_user_reftab(userinfo):
     """
     Create a new user account in Reftab for the employee
@@ -29,14 +30,14 @@ def create_user_reftab(userinfo):
     print("Creating user account in Reftab")
     # Initialize the request body
     body = {
-                "name" :  userinfo['fname'] + " " + userinfo['lname'], 
-                "email" : userinfo['email_address'],
-                "title" : userinfo['title'],
-                "employeeId" : userinfo['email_address'],
-                "details" : {}
-            }
+        "name":  userinfo['fname'] + " " + userinfo['lname'],
+        "email": userinfo['email_address'],
+        "title": userinfo['title'],
+        "employeeId": userinfo['email_address'],
+        "details": {}
+    }
 
-    if userinfo['test_mode'] == False:
+    if userinfo['test_mode'] is False:
         # Create the user account
         try:
             response = client.post('loanees', body)
@@ -57,6 +58,7 @@ def create_user_reftab(userinfo):
         userinfo['reftab_request'] = body
         return userinfo
 
+
 def search_users(username):
     """
     Seach Reftab for user account by username
@@ -76,8 +78,9 @@ def search_users(username):
     else:
         return response
 
+
 def get_loans(userid=None, loan_id=None):
-    """ 
+    """
     Get individual (loan_id) or all loans (userid)
     userid      int/str     loanee ID in Reftab
     loan_id     int/str     loan ID in Reftab
@@ -88,16 +91,15 @@ def get_loans(userid=None, loan_id=None):
     if (userid):
         try:
             response = client.get('loans', loan_uid=str(userid))
-        except HttpError as e:
+        except HTTPError as e:
             print("Error getting loans for user, suggest checking uid: " + str(userid))
             sys.exit()
     elif (loan_id):
         try:
             response = client.get('loans', loan_id=str(loan_id))
-        except HttpError as e:
-            pprint(e, width=80)
+        except:
+            pprint("Error getting loans", width=80)
             sys.exit()
-
 
     try:
         response
@@ -108,6 +110,7 @@ def get_loans(userid=None, loan_id=None):
             return response
     except TypeError:
         sys.exit("Unable to retrieve loans")
+
 
 def get_asset(asset_id):
     """
@@ -121,6 +124,7 @@ def get_asset(asset_id):
 
     return response
 
+
 def update_asset_status(asset, status):
     """
     Updates the status label of a given asset
@@ -132,14 +136,15 @@ def update_asset_status(asset, status):
     """
     if status == "term":
         asset['status'] = {
-                            'color': '#ddec09',
-                            'defaultVisibility': 0,
-                            'loanability': 0,
-                            'name': 'Needs shipped home'
-                        }
-        asset['statid'] = 65952 # ID for status label in Reftab
+            'color': '#ddec09',
+            'defaultVisibility': 0,
+            'loanability': 0,
+            'name': 'Needs shipped home'
+        }
+        asset['statid'] = 65952  # ID for status label in Reftab
     response = client.put('assets', asset['aid'], body=asset)
     return response
+
 
 def terminate_user(userinfo):
     """
@@ -175,7 +180,6 @@ def terminate_user(userinfo):
     except KeyError:
         userid = user['uid']
 
-    
     loans = get_loans(userid=userid)
     try:
         for loan in loans:
@@ -198,25 +202,24 @@ def terminate_user(userinfo):
     # Update device due date to TODAY at 5PM
     due_date = datetime.today().strftime('%Y-%m-%d') + "T22:00:00Z"
     # Update device status to "Needs shipped home"
-    
+
     body = {
-            'status': status,
-            'notes': 'Employee terminated',
-            'due': str(due_date)
-            }
+        'status': status,
+        'notes': 'Employee terminated',
+        'due': str(due_date)
+    }
 
     # update the loan status
-    if userinfo['test_mode'] == False:
+    if userinfo['test_mode'] is False:
         client.put('loans', id=str(loan_id), body=body)
 
     # update the asset status label
     asset = get_asset(asset_id)
-    
-    if userinfo['test_mode'] == False:
+
+    if userinfo['test_mode'] is False:
         response = update_asset_status(asset, "term")
 
     print("User's device has been updated in Reftab")
 
     # Uncomment for debugging purposes or to see the asset response
     # return response
-

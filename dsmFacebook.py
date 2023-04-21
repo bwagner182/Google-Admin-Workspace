@@ -6,9 +6,7 @@ admin activities - specifically removing users' access at the
 time of employee termination.
 """
 
-import json
 import keys
-import os
 import requests
 import sys
 
@@ -16,6 +14,7 @@ from pprint import pprint
 
 FB_API_VERSION = "v16.0"
 FB_API_ADDRESS = "https://graph.facebook.com/"
+
 
 def get_access_token(businessManager):
     """Authorize the app
@@ -41,6 +40,7 @@ def get_access_token(businessManager):
         print("response did not have an access token for you")
     return access_token
 
+
 def get_business_manager_admins(city):
     """Pull list of admins for a specified business manager
 
@@ -55,7 +55,7 @@ def get_business_manager_admins(city):
     """
     access_token = get_access_token(city)
 
-    uri =  FB_API_ADDRESS + FB_API_VERSION + "/"
+    uri = FB_API_ADDRESS + FB_API_VERSION + "/"
     uri = uri + keys.BUSINESS_IDS[city]['business_id'] + "/business_users"
     uri = uri + "?access_token=" + access_token
 
@@ -73,8 +73,9 @@ def get_business_manager_admins(city):
             return response['data']
     except KeyError:
         print("Error getting users")
-        print(response)
+        pprint(response, width=80)
         return response
+
 
 def find_fb_admin(users, name):
     """Search user list for specified user name
@@ -98,6 +99,7 @@ def find_fb_admin(users, name):
 
     return emp
 
+
 def business_manager_user_delete(user, businessManager):
     """Delete specified user from specified busines manager account
 
@@ -112,20 +114,21 @@ def business_manager_user_delete(user, businessManager):
     Returns:
         response (dict): response from the Meta API
     """
-
     access_token = get_access_token(businessManager)
     uri = FB_API_ADDRESS + FB_API_VERSION + "/"
     uri = uri + user['id']
+    uri = uri + "?access_token=" + access_token
 
     response = requests.delete(uri).json()
     return response
 
+
 def fbdelete(userinfo):
     """Delete the user from business manager accounts
-    
+
     This function will initiate all the required steps to
     remove a user from Facebook Business Manager
-    
+
     Args:
         userinfo (dict): user object with required fields
 
@@ -146,4 +149,3 @@ def fbdelete(userinfo):
         print("User removed from Business Manager " + key)
 
     return resp
-
