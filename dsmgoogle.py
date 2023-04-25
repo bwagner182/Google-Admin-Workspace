@@ -664,18 +664,37 @@ def create_user_google(userinfo):
             print("New office? Contact the developer to have it added to the app.")
             print("Location entered: " + userinfo['home_city'])
 
-    # Double check for user email address first and confirm that the user
-    # wants to create a new account if an account is found
-    # (will need a new email address: userinfo['fname'][:2] + userinfo['lname'] )
+    # Double check for similar user email address first and confirm that the
+    # user wants to create a new account if an account is found (will
+    # need a new email address: userinfo['fname'][:2] + userinfo['lname'] )
     result = None
     try:
         result = service.users().get(userKey=userinfo['email_address']).execute()
     except:
         pass
 
+    if userinfo['city'] == 'stl':
+        domain = "@drivesmn.com"
+        try:
+            result = service.users().get(userKey=userinfo['username'] + domain).execute()
+        except:
+            pass
+    else:
+        domain = "@drivestl.com"
+        try:
+            result = service.users().get(userKey=userinfo['username'] + domain).execute()
+        except:
+            pass
+
+    domain = "@marketingmilk.com"
+    try:
+        result = service.users().get(userKey=userinfo['username'] + domain).execute()
+    except:
+        pass
+
     # Email address found, suggest a new address
     if result is not None:
-        print("User email address already exists, suggest using a new address")
+        print("User email address (or similar) already exists, suggest using a new address")
         print("New suggested email address: " + userinfo['fname'][:2].lower() +
             userinfo['lname'].lower() + userinfo['email_suffix'])
         answer = input("Use this address? (y/n)")
@@ -815,6 +834,7 @@ def terminate_user(userinfo):
     response    dict    Google user object
     userinfo    dict    user object (only when test mode enabled)
     """
+    user_signout(userinfo['email'])
     user = find_user(userinfo)
     user['password'] = generate_password()
     addToClipBoard(user['password'])
@@ -835,3 +855,17 @@ def terminate_user(userinfo):
         print("failed to suspend user account")
         sys.exit()
     return response
+
+
+def user_signout(email):
+    """cause the user to sign out immediately
+
+    kick the terminated user out of their account
+
+    Args:
+        email (str): email address you're looking to log out
+    """
+    try:
+        response = service.users().signOut(userKey=email).execute()
+    except:
+        print("Error logging out the user")
