@@ -158,6 +158,15 @@ def term_employee_window():
                 key="log",
                 expand_x=True,
                 expand_y=True
+                ),
+            gui.Button(
+                button_text="Copy",
+                enable_events=True,
+                border_width=5,
+                key="btnCopy",
+                font=("Roboto", 18),
+                pad=(10, 20),
+                visible=False
                 )
         ]
 
@@ -354,8 +363,7 @@ def gui_check_city(window, userinfo):
     return userinfo
 
 
-def gui_term_employee_values(window, userinfo):
-    event, values = window.read()
+def gui_term_employee_values(values, userinfo):
     userinfo['fname'] = values['fname']
     userinfo['lname'] = values['lname']
     userinfo['email_address'] = values['email']
@@ -388,24 +396,13 @@ def main(userinfo=userinfo):
         elif event == 'btnTerm' and not windowTerm and not windowNew:
             windowMain.disappear()
             windowTerm = term_employee_window()
-        elif event == 'btnSubmitTerm' and not windowNew:
-            userinfo = gui_term_employee_values(windowTerm, userinfo)
+        elif event == 'btnSubmitTerm' and windowTerm:
+            userinfo = gui_term_employee_values(values, userinfo)
+            userinfo = gui_check_name(userinfo)
             password = term_employee(userinfo)
             clear_term_emp_fields(windowTerm)
             windowTerm['log'].Update(value="User password:  " + password)
-            try:
-                windowTerm['btnCopy']
-            except:
-                windowTerm.add_row(
-                    gui.Button(
-                        button_text="Copy",
-                        enable_events=True,
-                        border_width=5,
-                        key="btnCopy",
-                        font=("Roboto", 18),
-                        pad=(10, 20)
-                        )
-                    )
+            windowTerm['btnCopy'].Update(visible=True)
         elif event == 'btnSubmitNew' and not windowTerm:
             result = "error"
             window['log'].update(value='Working')

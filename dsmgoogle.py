@@ -834,7 +834,7 @@ def terminate_user(userinfo):
     response    dict    Google user object
     userinfo    dict    user object (only when test mode enabled)
     """
-    user_signout(userinfo['email'])
+    user_signout(userinfo['email_address'])
     user = find_user(userinfo)
     user['password'] = generate_password()
     addToClipBoard(user['password'])

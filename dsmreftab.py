@@ -176,7 +176,7 @@ def terminate_user(userinfo):
             user = search_users(userinfo['email_address'])[0]
 
     try:
-        userid = user['lid']
+        userid = user['lnid']
     except KeyError:
         userid = user['uid']
 
