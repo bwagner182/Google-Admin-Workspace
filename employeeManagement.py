@@ -334,20 +334,12 @@ def new_employee(userinfo):
     if "google_resp" in userinfo and userinfo['google_resp'] != "success":
         print("Google user creation error")
         pprint(userinfo['google_error'], width=75)
-    # else:
-    #     if userinfo['test_mode'] is False:
-    #         answer = input("Would you like to see the user's groups? (y/n)")
-
-    #         if answer == 'y':
-    #             if "google_groups_resp" in userinfo:
-    #                 pprint(userinfo['google_groups_resp'], width=75)
-    #             elif len(userinfo['google_groups_resp']) < 1:
-    #                 print("No Groups")
 
     if userinfo['test_mode'] is True:
         os.system("clear")
         pprint(userinfo, width=75)
 
+    return "Success"
 
 def term_employee(userinfo):
     """
@@ -355,9 +347,8 @@ def term_employee(userinfo):
     userinfo    dict    user object
     """
     dsmreftab.terminate_user(userinfo)
-    dsmgoogle.terminate_user(userinfo)
-    sys.exit()
-
+    password = dsmgoogle.terminate_user(userinfo)[1]
+    return password
 
 def main():
     userinfo = dict([])

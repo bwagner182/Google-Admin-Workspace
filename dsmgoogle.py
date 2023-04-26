@@ -854,7 +854,7 @@ def terminate_user(userinfo):
     except:
         print("failed to suspend user account")
         sys.exit()
-    return response
+    return response, user['password']
 
 
 def user_signout(email):
