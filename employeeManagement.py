@@ -12,6 +12,7 @@ from pprint import pprint
 
 import dsmgoogle
 import dsmreftab
+import employeeManagementGui
 import helpfile
 import keys
 import mosyle
@@ -162,7 +163,7 @@ def check_title(userinfo):
             case "digital analyst":
                 userinfo['title_short'] = "am"
             case "controller":
-                userinfo['title_chort'] = "fin"
+                userinfo['title_short'] = "fin"
             case "finance":
                 userinfo['title_short'] = "fin"
             case _:
@@ -317,11 +318,6 @@ def new_employee(userinfo):
     Initialize the process of a new employee, this calls the other functions
     userinfo    dict    user object
     """
-    userinfo = collect_info(userinfo)
-    resp = display_user(userinfo)
-
-    if resp is not True:
-        sys.exit("Error displaying userinfo, display_user() returned 'false'")
 
     userinfo = dsmgoogle.create_user_google(userinfo)
     userinfo = mosyle.create_user_mosyle(userinfo)
@@ -338,15 +334,15 @@ def new_employee(userinfo):
     if "google_resp" in userinfo and userinfo['google_resp'] != "success":
         print("Google user creation error")
         pprint(userinfo['google_error'], width=75)
-    else:
-        if userinfo['test_mode'] is False:
-            answer = input("Would you like to see the user's groups? (y/n)")
+    # else:
+    #     if userinfo['test_mode'] is False:
+    #         answer = input("Would you like to see the user's groups? (y/n)")
 
-            if answer == 'y':
-                if "google_groups_resp" in userinfo:
-                    pprint(userinfo['google_groups_resp'], width=75)
-                elif len(userinfo['google_groups_resp']) < 1:
-                    print("No Groups")
+    #         if answer == 'y':
+    #             if "google_groups_resp" in userinfo:
+    #                 pprint(userinfo['google_groups_resp'], width=75)
+    #             elif len(userinfo['google_groups_resp']) < 1:
+    #                 print("No Groups")
 
     if userinfo['test_mode'] is True:
         os.system("clear")
@@ -358,8 +354,6 @@ def term_employee(userinfo):
     Runs all the termination functions from each platform
     userinfo    dict    user object
     """
-    userinfo = collect_name(userinfo)
-    userinfo = collect_email(userinfo)
     dsmreftab.terminate_user(userinfo)
     dsmgoogle.terminate_user(userinfo)
     sys.exit()
@@ -377,10 +371,20 @@ def main():
         userinfo['test_mode'] = False
         os.system("clear")
 
+    if "gui" in arguments:
+        employeeManagementGui.main()
+        return
+
     if "new" in arguments:
         new_arg = arguments.index("new")
         new_arg += 1
         if arguments[new_arg] == "employee":
+            userinfo = collect_info(userinfo)
+            # resp = display_user(userinfo)
+
+            if resp is not True:
+                sys.exit("Error displaying userinfo, display_user() returned 'false'")
+
             new_employee(userinfo)
         else:
             print("Invalid entry for option: new")
@@ -389,6 +393,8 @@ def main():
         new_arg = arguments.index("term")
         new_arg += 1
         if arguments[new_arg] == "employee":
+            userinfo = collect_name(userinfo)
+            userinfo = collect_email(userinfo)
             term_employee(userinfo)
         else:
             print("Invalid entry for option: term")
