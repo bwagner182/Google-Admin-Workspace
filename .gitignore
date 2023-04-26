@@ -6,5 +6,7 @@ quickstart.py
 token.json
 .DS_Store
 *.pyc
-
+/build/
+/dist/
 ._*
+setup.py
