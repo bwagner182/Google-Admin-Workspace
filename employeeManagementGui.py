@@ -4,7 +4,7 @@ import pandas as pd
 from pprint import pprint
 import dsmreftab, dsmgoogle, mosyle
 import os.path
-import base64
+
 
 userinfo = dict()
 userinfo['test_mode'] = False
@@ -14,11 +14,11 @@ gui.theme('DarkBlack1')
 
 def build_main_window():
     """Build the main window
-    
+
     Builds out the main window for user management
-    Allows the user to select which main function they will 
+    Allows the user to select which main function they will
     be using
-    
+
     Returns:
         windowMain: window object
     """
@@ -98,7 +98,7 @@ def new_employee_window():
                 size=(16, 1),
                 key='fname',
                 focus=True,
-                pad=(5,10),
+                pad=(5, 10),
                 font=("Roboto", 20)
             ),
             gui.Text(
@@ -110,14 +110,14 @@ def new_employee_window():
                 size=(16, 1),
                 key='lname',
                 focus=False,
-                pad=(5,10),
+                pad=(5, 10),
                 font=("Roboto", 20)
             )
         ],
         [
             gui.Text(
                 text="Title",
-                size=(12,1),
+                size=(12, 1),
                 font=("Roboto", 16)
             ),
             gui.Input(
@@ -228,14 +228,14 @@ def term_employee_window():
         [
             gui.Text(
                 text="Email address",
-                size=(12,1),
+                size=(12, 1),
                 font=("Roboto", 16)
             ),
             gui.Input(
                 size=(16, 1),
                 key='email',
                 focus=False,
-                pad=(5,10),
+                pad=(5, 10),
                 font=("Roboto", 20)
             ),
         ],
@@ -343,7 +343,7 @@ def gui_term_employee_values(values, userinfo):
     Args:
         values (dict): from the window input fields
         userinfo (dict): stored user data
-    
+
     Returns:
         dict: stored user data for later use
     """
@@ -486,8 +486,16 @@ def gui_check_city(window, userinfo):
             case "nash":
                 userinfo['city'] = "nsh"
             case _:
-                window['log'].Update(value="Unable to recognize the employee's home city. Consult the application developer and give them the error below.")
-                window['home_city'].Update(background_color="red", text_color="white", select=True)
+                window['log'].Update(
+                    value="Unable to recognize the employee's home city. \
+                    Consult the application developer and give them the error \
+                    below."
+                    )
+                window['home_city'].Update(
+                    background_color="red",
+                    text_color="white",
+                    select=True
+                    )
                 userinfo['error'] = True
     else:
         match userinfo['home_city'].lower():
