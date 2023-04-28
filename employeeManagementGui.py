@@ -1,7 +1,10 @@
 import PySimpleGUI as gui
 import pandas as pd
-from employeeManagement import new_employee, term_employee
+# from employeeManagement import new_employee, term_employee
 from pprint import pprint
+import dsmreftab, dsmgoogle, mosyle
+import os.path
+import base64
 
 userinfo = dict()
 userinfo['test_mode'] = False
@@ -10,9 +13,19 @@ gui.theme('DarkBlack1')
 
 
 def build_main_window():
+    """Build the main window
+    
+    Builds out the main window for user management
+    Allows the user to select which main function they will 
+    be using
+    
+    Returns:
+        windowMain: window object
+    """
     layoutMain = [
         [
-            gui.Text("Are you creating a new employee or terminating someone?",
+            gui.Text(
+                "Are you creating a new employee or terminating someone?",
                 auto_size_text=True,
                 size=(40, 2),
                 expand_x=True,
@@ -20,7 +33,8 @@ def build_main_window():
             )
         ],
         [
-            gui.Button(button_text="New Employee",
+            gui.Button(
+                button_text="New Employee",
                 enable_events=True,
                 border_width=5,
                 key='btnNew',
@@ -28,7 +42,8 @@ def build_main_window():
                 pad=(10, 20),
                 button_color="green"
             ),
-            gui.Button(button_text="Term Employee",
+            gui.Button(
+                button_text="Term Employee",
                 enable_events=True,
                 border_width=5,
                 key='btnTerm',
@@ -36,7 +51,8 @@ def build_main_window():
                 pad=(10, 20),
                 button_color="red"
             ),
-            gui.Button(button_text="Exit",
+            gui.Button(
+                button_text="Exit",
                 enable_events=True,
                 border_width=5,
                 key='exit',
@@ -55,9 +71,17 @@ def build_main_window():
 
 
 def new_employee_window():
+    """Build out the New Employee Window
+
+    Builds the new employee window with all applicable input fields
+
+    Returns:
+        windowNew: window object
+    """
     layoutNew = [
         [
-            gui.Text(text="Fill in the fields to create accounts for a new employee",
+            gui.Text(
+                text="Fill in the fields to create employee accounts",
                 auto_size_text=True,
                 size=(60, 2),
                 expand_x=True,
@@ -65,33 +89,76 @@ def new_employee_window():
             )
         ],
         [
-            gui.Text(text="First name", size=(12, 1), font=("Roboto", 16)),
-            gui.Input(size=(16, 1), key='fname', focus=True, pad=(5,10), font=("Roboto", 20)),
-            gui.Text(text="Last name", size=(12, 1), font=("Roboto", 16)),
-            gui.Input(size=(16, 1), key='lname', focus=False, pad=(5,10), font=("Roboto", 20))
+            gui.Text(
+                text="First name",
+                size=(12, 1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='fname',
+                focus=True,
+                pad=(5,10),
+                font=("Roboto", 20)
+            ),
+            gui.Text(
+                text="Last name",
+                size=(12, 1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='lname',
+                focus=False,
+                pad=(5,10),
+                font=("Roboto", 20)
+            )
         ],
         [
-            gui.Text(text="Title", size=(12,1), font=("Roboto", 16)),
-            gui.Input(size=(16, 1), key='title', focus=False, pad=(5,10), font=("Roboto", 20)),
-            gui.Text(text="Home city", size=(12,1), font=("Roboto", 16)),
-            gui.Input(size=(16,1), key='home_city', focus=False, pad=(5,10), font=("Roboto", 20))
+            gui.Text(
+                text="Title",
+                size=(12,1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='title',
+                focus=False,
+                pad=(5, 10),
+                font=("Roboto", 20)
+            ),
+            gui.Text(
+                text="Home city",
+                size=(12, 1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='home_city',
+                focus=False,
+                pad=(5, 10),
+                font=("Roboto", 20)
+            )
         ],
 
         [
-            gui.Button(button_text="Go Back",
+            gui.Button(
+                button_text="Go Back",
                 enable_events=True,
                 border_width=5,
                 key='btnMain',
                 font=("Roboto", 18),
                 pad=(10, 20)
             ),
-            gui.Button(button_text="Submit",
+            gui.Button(
+                button_text="Submit",
                 enable_events=True,
                 border_width=5,
                 key='btnSubmitNew',
                 font=("Roboto", 18),
                 pad=(10, 20),
-                button_color="green"
+                button_color="green",
+                bind_return_key=True
             ),
             gui.Text(
                 text="",
@@ -114,10 +181,18 @@ def new_employee_window():
 
 
 def term_employee_window():
+    """Build Termination Window
+
+    Builds out the window to terminate a user with all applicable fields
+
+    Returns:
+        windowTerm: window object
+    """
     layoutTerm = [
         [
             gui.Text(
-                text="Fill in the fields to lock employee out of their accounts.",
+                text="Fill in the fields to lock employee out \
+                of their accounts.",
                 auto_size_text=True,
                 size=(60, 2),
                 expand_x=True,
@@ -125,31 +200,64 @@ def term_employee_window():
             )
         ],
         [
-            gui.Text(text="First name", size=(12, 1), font=("Roboto", 16)),
-            gui.Input(size=(16, 1), key='fname', focus=True, pad=(5,10), font=("Roboto", 20)),
-            gui.Text(text="Last name", size=(12, 1), font=("Roboto", 16)),
-            gui.Input(size=(16, 1), key='lname', focus=False, pad=(5,10), font=("Roboto", 20))
+            gui.Text(
+                text="First name",
+                size=(12, 1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='fname',
+                focus=True,
+                pad=(5, 10),
+                font=("Roboto", 20)
+            ),
+            gui.Text(
+                text="Last name",
+                size=(12, 1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='lname',
+                focus=False,
+                pad=(5, 10),
+                font=("Roboto", 20)
+            )
         ],
         [
-            gui.Text(text="Email address", size=(12,1), font=("Roboto", 16)),
-            gui.Input(size=(16, 1), key='email', focus=False, pad=(5,10), font=("Roboto", 20)),
+            gui.Text(
+                text="Email address",
+                size=(12,1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='email',
+                focus=False,
+                pad=(5,10),
+                font=("Roboto", 20)
+            ),
         ],
 
         [
-            gui.Button(button_text="Go Back",
+            gui.Button(
+                button_text="Go Back",
                 enable_events=True,
                 border_width=5,
                 key='btnMain',
                 font=("Roboto", 18),
                 pad=(10, 20)
             ),
-            gui.Button(button_text="Submit",
+            gui.Button(
+                button_text="Submit",
                 enable_events=True,
                 border_width=5,
                 key='btnSubmitTerm',
                 font=("Roboto", 18),
                 pad=(10, 20),
-                button_color="red"
+                button_color="red",
+                bind_return_key=True
             ),
             gui.Text(
                 text="",
@@ -181,6 +289,13 @@ def term_employee_window():
 
 
 def clear_new_emp_fields(window):
+    """Clears the fields in the new employee window
+
+    updates all employee fields to blank inputs
+
+    Args:
+        window (object): gui window object
+    """
     window['fname'].Update('')
     window['lname'].Update('')
     window['title'].Update('')
@@ -188,16 +303,53 @@ def clear_new_emp_fields(window):
 
 
 def clear_term_emp_fields(window):
+    """clears fields in the term employee window
+
+    updates all employee fields in the termination window to blank inputs
+
+    Args:
+        window (object): gui window object
+    """
     window['fname'].Update('')
     window['lname'].Update('')
     window['email'].Update('')
 
 
 def gui_new_employee_values(values, userinfo):
+    """Get and assign values
+
+    gets the values from the window input fields and assigns
+    them to the userinfo dict
+
+    Args:
+        values (dict): from the window object filled in by the user
+        userinfo (dict): stores data to be used in other functions
+
+    Returns:
+        dict: user fields stored for use in other functions
+    """
     userinfo['fname'] = values['fname']
     userinfo['lname'] = values['lname']
     userinfo['title'] = values['title']
     userinfo['home_city'] = values['home_city']
+    return userinfo
+
+
+def gui_term_employee_values(values, userinfo):
+    """Assigns values to terminate an employee
+
+    gets the values from the window to assign to the userinfo var
+
+    Args:
+        values (dict): from the window input fields
+        userinfo (dict): stored user data
+    
+    Returns:
+        dict: stored user data for later use
+    """
+    userinfo['fname'] = values['fname']
+    userinfo['lname'] = values['lname']
+    userinfo['email_address'] = values['email']
     return userinfo
 
 
@@ -213,9 +365,10 @@ def gui_check_name(userinfo):
 
     userinfo['username'] = userinfo['fname'][0].lower() +\
         userinfo['lname'].lower().replace('\'', '')
+    userinfo['username'] = userinfo['username'].strip()
 
     if userinfo['username'].find(" ") >= 0:
-        userinfo['username'] = userinfo['username'].lower().strip().replace(" ", "")
+        userinfo['username'] = userinfo['username'].replace(" ", "")
 
     if userinfo['username'].find("-") >= 0:
         userinfo['username'] = userinfo['username'].replace("-", "")
@@ -341,9 +494,15 @@ def gui_check_city(window, userinfo):
             case "atl" | "stl" | "nsh" | "mia" | "tpa":
                 None
             case _:
-                window['log'].Update(value="Invalid city entered. Please enter a current Drive\
-                    office location.")
-                window['home_city'].Update(background_color="red", text_color="white", select=True)
+                window['log'].Update(
+                    value="Invalid city entered. Please enter a current Drive\
+                    office location."
+                    )
+                window['home_city'].Update(
+                    background_color="red",
+                    text_color="white",
+                    select=True
+                    )
                 userinfo['error'] = True
         userinfo['city'] = userinfo['home_city']
 
@@ -363,16 +522,54 @@ def gui_check_city(window, userinfo):
     return userinfo
 
 
-def gui_term_employee_values(values, userinfo):
-    userinfo['fname'] = values['fname']
-    userinfo['lname'] = values['lname']
-    userinfo['email_address'] = values['email']
-    return userinfo
+def gui_new_employee(userinfo):
+    """
+    Initialize the process of a new employee, this calls the other functions
+    userinfo    dict    user object
+    """
+    error = False
+    userinfo = dsmgoogle.create_user_google(userinfo)
+    userinfo = mosyle.create_user_mosyle(userinfo)
+    userinfo = dsmreftab.create_user_reftab(userinfo)
+
+    if "mosyle_resp" in userinfo and userinfo['mosyle_resp'] != "success":
+        error = True
+
+    if "reftab_resp" in userinfo and userinfo['reftab_resp'] != "success":
+        error = True
+
+    if "google_resp" in userinfo and userinfo['google_resp'] != "success":
+        error = True
+
+    if userinfo['test_mode'] is True:
+        os.system("clear")
+        pprint(userinfo, width=75)
+
+    if error is not True:
+        return "Success"
+
+
+def gui_term_employee(userinfo):
+    """
+    Runs all the termination functions from each platform
+    userinfo    dict    user object
+    """
+    dsmreftab.terminate_user(userinfo)
+    password = dsmgoogle.terminate_user(userinfo)[1]
+    return password
 
 
 def copy_text(text):
+    """copy text
+
+    takes text and puts it on the clipboard for use
+
+    Args:
+        text (str): text to be added to the clipboard
+    """
     df = pd.DataFrame([text])
     df.to_clipboard(index=False, header=False)
+
 
 def main(userinfo=userinfo):
     windowMain, windowNew, windowTerm = build_main_window(), None, None
@@ -393,30 +590,32 @@ def main(userinfo=userinfo):
         elif event == 'btnNew' and not windowNew and not windowTerm:
             windowMain.disappear()
             windowNew = new_employee_window()
+        elif event == 'btnSubmitNew' and not windowTerm:
+            result = "error"
+            window['log'].update(value='Working')
+            window.read(timeout=0)
+            userinfo = gui_new_employee_values(values, userinfo=userinfo)
+            userinfo = gui_check_name(userinfo)
+            userinfo = gui_check_city(windowNew, userinfo=userinfo)
+            userinfo = gui_check_title(windowNew, userinfo=userinfo)
+            try:
+                userinfo['error']
+            except KeyError:
+                result = gui_new_employee(userinfo)
+                clear_new_emp_fields(windowNew)
+                window['log'].update(value=result)
         elif event == 'btnTerm' and not windowTerm and not windowNew:
             windowMain.disappear()
             windowTerm = term_employee_window()
         elif event == 'btnSubmitTerm' and windowTerm:
             userinfo = gui_term_employee_values(values, userinfo)
             userinfo = gui_check_name(userinfo)
-            password = term_employee(userinfo)
+            password = gui_term_employee(userinfo)
             clear_term_emp_fields(windowTerm)
-            windowTerm['log'].Update(value="User password:  " + password)
+            windowTerm['log'].Update(
+                value="New password for " + userinfo['email_address']
+                + ":  " + password)
             windowTerm['btnCopy'].Update(visible=True)
-        elif event == 'btnSubmitNew' and not windowTerm:
-            result = "error"
-            window['log'].update(value='Working')
-            userinfo = gui_new_employee_values(values, userinfo=userinfo)
-            userinfo = gui_check_name(userinfo)
-
-            userinfo = gui_check_city(windowNew, userinfo=userinfo)
-            userinfo = gui_check_title(windowNew, userinfo=userinfo)
-            try:
-                userinfo['error']
-            except KeyError:
-                result = new_employee(userinfo)
-                clear_new_emp_fields(windowNew)
-                window['log'].update(value=result)
         elif event == 'btnMain' and windowTerm or windowNew:
             try:
                 windowNew.close()
@@ -433,4 +632,3 @@ def main(userinfo=userinfo):
 
 if __name__ == '__main__':
     main()
-

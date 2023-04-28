@@ -341,6 +341,7 @@ def new_employee(userinfo):
 
     return "Success"
 
+
 def term_employee(userinfo):
     """
     Runs all the termination functions from each platform
