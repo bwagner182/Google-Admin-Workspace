@@ -29,8 +29,7 @@ In order to user this program, you'll need to configure the appropriate API
 keys and passwords that will be used in the program. This includes Reftab,
 Mosyle, and Google. Google will require the most setup as it requires you to
 have a Google Cloud Project set up and you will need to enable the Google Admin
-SDK API, and the Google API Client library for Python - [more information here]
-(https://developers.google.com/admin-sdk/directory/v1/api-lib/python)
+SDK API, and the Google API Client library for Python - [more information here](https://developers.google.com/admin-sdk/directory/v1/api-lib/python)
 
 ## Usage
 
