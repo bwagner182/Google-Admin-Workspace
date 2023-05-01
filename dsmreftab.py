@@ -42,7 +42,8 @@ def create_user_reftab(userinfo):
         try:
             response = client.post('loanees', body)
         except:
-            sys.exit("Error when creating the user in Reftab")
+            userinfo['reftab_resp'] = "Error creating user"
+            return userinfo
 
         if response['lnid'] and response['lnid'] != '':
             print("Reftab user creation SUCCESS")
@@ -176,7 +177,7 @@ def terminate_user(userinfo):
             user = search_users(userinfo['email_address'])[0]
 
     try:
-        userid = user['lid']
+        userid = user['lnid']
     except KeyError:
         userid = user['uid']
 
