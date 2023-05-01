@@ -9,7 +9,7 @@ BUSINESS_IDS = {
     "city" : {
         "business_id": "",
         "app_id": "",
-        "client_token": ""
+        "client_token": "",
         "app_secret": ""
     }
 }
