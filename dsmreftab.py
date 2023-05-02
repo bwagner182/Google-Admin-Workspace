@@ -6,7 +6,7 @@ better testing and code readability
 from reftab import ReftabClient
 
 from pprint import pprint
-from datetime import datetime
+import datetime
 import os
 import sys
 
@@ -143,7 +143,9 @@ def update_asset_status(asset, status):
             'name': 'Needs shipped home'
         }
         asset['statid'] = 65952  # ID for status label in Reftab
-    response = client.put('assets', asset['aid'], body=asset)
+        response = client.put('assets', asset['aid'], body=asset)
+    else:
+        response = "error"
     return response
 
 
@@ -200,8 +202,10 @@ def terminate_user(userinfo):
         # exit the function and move on
         return
 
-    # Update device due date to TODAY at 5PM
-    due_date = datetime.today().strftime('%Y-%m-%d') + "T22:00:00Z"
+    # Update device due date to TOMORROW at 5PM
+    due_date = datetime.datetime.today() + datetime.timedelta(days=1)
+    due_date = due_date.strftime('%Y-%m-%d')
+    due_date = due_date + "T22:00:00Z"
     # Update device status to "Needs shipped home"
 
     body = {
@@ -220,7 +224,11 @@ def terminate_user(userinfo):
     if userinfo['test_mode'] is False:
         response = update_asset_status(asset, "term")
 
-    print("User's device has been updated in Reftab")
+    if response != "error":
+        print("User's device has been updated in Reftab")
+    else:
+        print("There was an issue, I'm sorry. Please check the user and")
+        print("assigned devices in reftab")
 
     # Uncomment for debugging purposes or to see the asset response
     # return response
