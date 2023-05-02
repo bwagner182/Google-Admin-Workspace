@@ -1,9 +1,12 @@
 import PySimpleGUI as gui
 import pandas as pd
 # from employeeManagement import new_employee, term_employee
-from pprint import pprint
-import dsmreftab, dsmgoogle, mosyle
+import dsmgoogle
+import dsmreftab
+import mosyle
 import os.path
+
+from pprint import pprint
 
 
 userinfo = dict()
@@ -191,8 +194,7 @@ def term_employee_window():
     layoutTerm = [
         [
             gui.Text(
-                text="Fill in the fields to lock employee out \
-                of their accounts.",
+                text="Fill in the fields to lock employee out of their accounts.",
                 auto_size_text=True,
                 size=(60, 2),
                 expand_x=True,
@@ -286,6 +288,49 @@ def term_employee_window():
         finalize=True
         )
     return windowTerm
+
+
+def error_modal(error, function):
+    layoutError = [
+        [
+            gui.Text(
+                text=error,
+                size=(60, 3),
+                font=("Roboto", 18),
+                pad=(15, 15),
+                auto_size_text=True,
+                expand_x=True,
+                expand_y=True
+            )
+        ],
+        [
+            gui.Button(
+                button_text="Close",
+                enable_events=True,
+                border_width=5,
+                key="modalClose",
+                font=("Roboto", 18),
+                pad=(10, 20),
+                visible=True,
+                button_color="red"
+            )
+        ]
+    ]
+
+    modal = gui.Window(
+        title="Error from " + function,
+        layout=layoutError,
+        margins=(10, 10),
+        finalize=True
+    )
+
+    while modal:
+        event, values = modal.read()
+
+        if event == 'modalClose':
+            modal.close()
+            modal = None
+    return
 
 
 def clear_new_emp_fields(window):
@@ -452,10 +497,19 @@ def gui_check_title(window, userinfo):
             case "finance":
                 userinfo['title_short'] = "fin"
             case _:
-                window['log'].update(value="Unable to recognize the employee's title. Please fix or alert the developer")
-                window['title'].Update(background_color="red", text_color="white", select=True)
+                window['title'].Update(
+                    background_color="red",
+                    text_color="white",
+                    select=True
+                    )
+                window['log'].Update("Error")
+                window.read(timeout=0)
+                error_modal(
+                    error="Unable to recognize the employee's title. Please \
+                        fix or alert the developer",
+                    function="gui_check_title"
+                    )
                 userinfo['error'] = True
-
     else:
         userinfo['title_short'] = userinfo['title']
 
@@ -486,32 +540,35 @@ def gui_check_city(window, userinfo):
             case "nash":
                 userinfo['city'] = "nsh"
             case _:
-                window['log'].Update(
-                    value="Unable to recognize the employee's home city. \
-                    Consult the application developer and give them the error \
-                    below."
-                    )
                 window['home_city'].Update(
                     background_color="red",
                     text_color="white",
                     select=True
                     )
+                window['log'].Update("Error")
+                window.read(timeout=0)
                 userinfo['error'] = True
+                error_modal(
+                    error="Unable to recognize the employee's home city. Please fix or consult the developer.",
+                    function="gui_check_city"
+                    )
     else:
         match userinfo['home_city'].lower():
             case "atl" | "stl" | "nsh" | "mia" | "tpa":
                 None
             case _:
-                window['log'].Update(
-                    value="Invalid city entered. Please enter a current Drive\
-                    office location."
-                    )
                 window['home_city'].Update(
                     background_color="red",
                     text_color="white",
                     select=True
                     )
+                window['log'].Update("Error")
+                window.read(timeout=0)
                 userinfo['error'] = True
+                error_modal(
+                    error="Unable to recognize the employee's home city. Please fix or consult the developer.",
+                    function="gui_check_city"
+                    )
         userinfo['city'] = userinfo['home_city']
 
     if userinfo['home_city'].lower() == "stl" or \
@@ -545,6 +602,12 @@ def gui_new_employee(userinfo):
 
     if "reftab_resp" in userinfo and userinfo['reftab_resp'] != "success":
         error = True
+    else:
+        modalError = error_modal(
+            error=userinfo['mosyle_resp'],
+            function="gui_new_employee -> dsmreftab.create_user_reftab"
+            )
+        display_modal(modalError)
 
     if "google_resp" in userinfo and userinfo['google_resp'] != "success":
         error = True
