@@ -3,7 +3,7 @@
 This is used to add/remove employees from Drive systems
 
 Attributes:
-    if __name__: check to see if user is running application for a new user or to term one
+    if __name__: check for new or terminating employee
 """
 import os
 import sys
@@ -12,6 +12,7 @@ from pprint import pprint
 
 import dsmgoogle
 import dsmreftab
+import employeeManagementGui
 import helpfile
 import keys
 import mosyle
@@ -28,9 +29,11 @@ def collect_name(userinfo):
     print("Enter the new employee's information below.")
     userinfo['fname'] = input("First name: ").strip()
     userinfo['lname'] = input("Last name: ").strip()
-    userinfo['username'] = userinfo['fname'][0].lower() + userinfo['lname'].lower().replace('\'', '')
+    userinfo['username'] = userinfo['fname'][0].lower() +\
+        userinfo['lname'].lower().replace('\'', '')
     userinfo = check_name(userinfo)
     return userinfo
+
 
 def check_name(userinfo):
     """
@@ -39,7 +42,7 @@ def check_name(userinfo):
     userinfo    dict    user object
 
     Returns
-    userinfo    dict    user object   
+    userinfo    dict    user object
     """
     if userinfo['fname'].find(" ") >= 0:
         print("Employee's first name contains spaces? (y/n)")
@@ -55,12 +58,14 @@ def check_name(userinfo):
             print("fix the name")
             sys.exit()
         else:
-            userinfo['username'] = userinfo['fname'][0].lower() + userinfo['lname'].lower().strip().replace(" ", "")
+            userinfo['username'] = userinfo['fname'][0].lower() +\
+                userinfo['lname'].lower().strip().replace(" ", "")
 
     if userinfo['lname'].find("-") >= 0:
         userinfo['username'] = userinfo['username'].replace("-", "")
 
     return userinfo
+
 
 def collect_email(userinfo):
     """
@@ -73,6 +78,7 @@ def collect_email(userinfo):
     userinfo['email_address'] = input("Email address: ").strip().lower()
     return userinfo
 
+
 def collect_title(userinfo):
     """
     Adds the user's title to the user dict
@@ -83,6 +89,7 @@ def collect_title(userinfo):
     """
     userinfo['title'] = input("Title: ").strip()
     return check_title(userinfo)
+
 
 def check_title(userinfo):
     """
@@ -156,7 +163,7 @@ def check_title(userinfo):
             case "digital analyst":
                 userinfo['title_short'] = "am"
             case "controller":
-                userinfo['title_chort'] = "fin"
+                userinfo['title_short'] = "fin"
             case "finance":
                 userinfo['title_short'] = "fin"
             case _:
@@ -177,6 +184,7 @@ def check_title(userinfo):
 
     return userinfo
 
+
 def collect_city(userinfo):
     """
     Adds the employee's home city to the user object
@@ -187,6 +195,7 @@ def collect_city(userinfo):
     """
     userinfo['home_city'] = input("Home office: ")
     return check_city(userinfo)
+
 
 def check_city(userinfo):
     """
@@ -230,7 +239,8 @@ def check_city(userinfo):
             case "atl" | "stl" | "nsh" | "mia" | "tpa":
                 None
             case _:
-                print("Invalid city entered. Please enter a current Drive office location.")
+                print("Invalid city entered. Please enter a current Drive\
+                    office location.")
                 print("You entered: " + userinfo['home_city'])
                 answer = input("Would you like to try again? (y/n)")
                 if answer.lower() == "y":
@@ -240,7 +250,9 @@ def check_city(userinfo):
 
         userinfo['city'] = userinfo['home_city']
 
-    if userinfo['home_city'].lower() == "stl" or userinfo['home_city'].lower() == "st. louis":
+    if userinfo['home_city'].lower() == "stl" or \
+            userinfo['home_city'].lower() == "st. louis":
+
         if userinfo['title'].lower() == "marketing milk":
             userinfo['email_suffix'] = "@marketingmilk.com"
         else:
@@ -252,6 +264,7 @@ def check_city(userinfo):
     userinfo['email_address'] = userinfo['username'] + userinfo['email_suffix']
 
     return userinfo
+
 
 def collect_info(userinfo):
     """
@@ -266,6 +279,7 @@ def collect_info(userinfo):
     userinfo = collect_city(userinfo)
     return userinfo
 
+
 def display_user(userinfo):
     """
     Display userinfo before submisison and allow for correction
@@ -275,8 +289,8 @@ def display_user(userinfo):
     bool
     """
     os.system("clear")
-    print("This information will be used to create the new employee's accounts,")
-    print("make sure the information is correct before continuing.")
+    print("This information will be used to create the new employee's")
+    print("accounts, make sure the information is correct before continuing.")
     print("First name: " + userinfo['fname'])
     print("Last name: " + userinfo['lname'])
     print("Title: " + userinfo['title'])
@@ -298,16 +312,12 @@ def display_user(userinfo):
         os.system("clear")
         sys.exit("Invalid input, program exiting")
 
+
 def new_employee(userinfo):
     """
     Initialize the process of a new employee, this calls the other functions
     userinfo    dict    user object
     """
-    userinfo = collect_info(userinfo)
-    resp = display_user(userinfo)
-    
-    if resp != True:
-        sys.exit("Error with userinfo displayed, display_user() returned 'false'")
 
     userinfo = dsmgoogle.create_user_google(userinfo)
     userinfo = mosyle.create_user_mosyle(userinfo)
@@ -324,30 +334,22 @@ def new_employee(userinfo):
     if "google_resp" in userinfo and userinfo['google_resp'] != "success":
         print("Google user creation error")
         pprint(userinfo['google_error'], width=75)
-    else:
-        if userinfo['test_mode'] == False:
-            answer = input("Would you like to see the user's groups? (y/n)")
 
-            if answer == 'y':
-                if "google_groups_resp" in userinfo:
-                    pprint(userinfo['google_groups_resp'], width=75)
-                elif len(userinfo['google_groups_resp']) < 1:
-                    print("No Groups")
-
-    if userinfo['test_mode'] == True:
+    if userinfo['test_mode'] is True:
         os.system("clear")
         pprint(userinfo, width=75)
+
+    return "Success"
+
 
 def term_employee(userinfo):
     """
     Runs all the termination functions from each platform
     userinfo    dict    user object
     """
-    userinfo = collect_name(userinfo)
-    userinfo = collect_email(userinfo)
     dsmreftab.terminate_user(userinfo)
-    dsmgoogle.terminate_user(userinfo)
-    sys.exit()
+    password = dsmgoogle.terminate_user(userinfo)[1]
+    return password
 
 def main():
     userinfo = dict([])
@@ -361,10 +363,20 @@ def main():
         userinfo['test_mode'] = False
         os.system("clear")
 
+    if "gui" in arguments:
+        employeeManagementGui.main()
+        return
+
     if "new" in arguments:
         new_arg = arguments.index("new")
         new_arg += 1
         if arguments[new_arg] == "employee":
+            userinfo = collect_info(userinfo)
+            # resp = display_user(userinfo)
+
+            if resp is not True:
+                sys.exit("Error displaying userinfo, display_user() returned 'false'")
+
             new_employee(userinfo)
         else:
             print("Invalid entry for option: new")
@@ -373,6 +385,8 @@ def main():
         new_arg = arguments.index("term")
         new_arg += 1
         if arguments[new_arg] == "employee":
+            userinfo = collect_name(userinfo)
+            userinfo = collect_email(userinfo)
             term_employee(userinfo)
         else:
             print("Invalid entry for option: term")

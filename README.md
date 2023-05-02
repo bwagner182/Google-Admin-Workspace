@@ -29,8 +29,7 @@ In order to user this program, you'll need to configure the appropriate API
 keys and passwords that will be used in the program. This includes Reftab,
 Mosyle, and Google. Google will require the most setup as it requires you to
 have a Google Cloud Project set up and you will need to enable the Google Admin
-SDK API, and the Google API Client library for Python [\(more information here\)]
-(https://developers.google.com/admin-sdk/directory/v1/api-lib/python)
+SDK API, and the Google API Client library for Python - [more information here](https://developers.google.com/admin-sdk/directory/v1/api-lib/python)
 
 ## Usage
 
@@ -61,7 +60,16 @@ expedite the process of locking them out of our systems \(Google\), as well as
 update their computer in Reftab and mark it as due immediately, and change the
 status label to mark the laptop "Needs to be shipped home". Once the process
 has completed, the new password for the ex-employee's Google Workspace account
-will be printed to the terminal window. 
+will be printed to the terminal window.
+
+### GUI
+
+run the script with the `gui` argument to run the program with a proper GUI
+
+`python employeeManagement.py gui`
+
+This will bring up the user interface for easier usage for your average user.
+Buttons should be self-explainatory once the application loads up.
 
 ## Special Thanks
 
