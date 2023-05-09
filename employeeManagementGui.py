@@ -539,6 +539,8 @@ def gui_check_city(window, userinfo):
                 userinfo['city'] = "nsh"
             case "nash":
                 userinfo['city'] = "nsh"
+            case "dallas":
+                userinfo['city'] = "dal"
             case _:
                 window['home_city'].Update(
                     background_color="red",
@@ -554,8 +556,8 @@ def gui_check_city(window, userinfo):
                     )
     else:
         match userinfo['home_city'].lower():
-            case "atl" | "stl" | "nsh" | "mia" | "tpa":
-                None
+            case "atl" | "stl" | "nsh" | "mia" | "tpa" | "dal":
+                userinfo['city'] = userinfo['home_city']
             case _:
                 window['home_city'].Update(
                     background_color="red",
@@ -569,7 +571,6 @@ def gui_check_city(window, userinfo):
                     error="Unable to recognize the employee's home city. Please fix or consult the developer.",
                     function="gui_check_city"
                     )
-        userinfo['city'] = userinfo['home_city']
 
     if userinfo['home_city'].lower() == "stl" or \
             userinfo['home_city'].lower() == "st. louis":
@@ -602,12 +603,10 @@ def gui_new_employee(userinfo):
 
     if "reftab_resp" in userinfo and userinfo['reftab_resp'] != "success":
         error = True
-    else:
         modalError = error_modal(
             error=userinfo['mosyle_resp'],
             function="gui_new_employee -> dsmreftab.create_user_reftab"
             )
-        display_modal(modalError)
 
     if "google_resp" in userinfo and userinfo['google_resp'] != "success":
         error = True
