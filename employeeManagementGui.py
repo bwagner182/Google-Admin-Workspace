@@ -333,6 +333,53 @@ def error_modal(error, function):
     return
 
 
+def device_list_modal(devices):
+    text = ""
+    for device in devices:
+        text = text + device + "\n"
+
+    layoutDeviceList = [
+        [
+            gui.Text(
+                text=text,
+                size=(60, 3),
+                font=("Roboto", 18),
+                pad=(15, 15),
+                auto_size_text=True,
+                expand_x=True,
+                expand_y=True
+            )
+        ],
+        [
+            gui.Button(
+                button_text="Close",
+                enable_events=True,
+                border_width=5,
+                key="devicesClose",
+                font=("Roboto", 18),
+                pad=(10, 20),
+                visible=True,
+                button_color="red"
+            )
+        ]
+    ]
+
+    deviceModal = gui.Window(
+        title="Devices loaned to employee",
+        layout=layoutDeviceList,
+        margins=(10, 10),
+        finalize=True
+    )
+
+    while deviceModal:
+        event, values = deviceModal.read()
+
+        if event == 'devicesClose':
+            deviceModal.close()
+            deviceModal = None
+    return
+
+
 def clear_new_emp_fields(window):
     """Clears the fields in the new employee window
 
@@ -409,8 +456,9 @@ def gui_check_name(userinfo):
     """
 
     userinfo['username'] = userinfo['fname'][0].lower() +\
-        userinfo['lname'].lower().replace('\'', '')
-    userinfo['username'] = userinfo['username'].strip()
+        userinfo['lname'].lower()
+
+    userinfo['username'] = userinfo['username'].strip().replace('\'', '')
 
     if userinfo['username'].find(" ") >= 0:
         userinfo['username'] = userinfo['username'].replace(" ", "")
@@ -539,6 +587,10 @@ def gui_check_city(window, userinfo):
                 userinfo['city'] = "nsh"
             case "nash":
                 userinfo['city'] = "nsh"
+            case "dallas":
+                userinfo['city'] = "dal"
+            case "remote":
+                userinfo['city'] = "rem"
             case _:
                 window['home_city'].Update(
                     background_color="red",
@@ -554,8 +606,8 @@ def gui_check_city(window, userinfo):
                     )
     else:
         match userinfo['home_city'].lower():
-            case "atl" | "stl" | "nsh" | "mia" | "tpa":
-                None
+            case "atl" | "stl" | "nsh" | "mia" | "tpa" | "dal" | "rem":
+                userinfo['city'] = userinfo['home_city']
             case _:
                 window['home_city'].Update(
                     background_color="red",
@@ -569,7 +621,6 @@ def gui_check_city(window, userinfo):
                     error="Unable to recognize the employee's home city. Please fix or consult the developer.",
                     function="gui_check_city"
                     )
-        userinfo['city'] = userinfo['home_city']
 
     if userinfo['home_city'].lower() == "stl" or \
             userinfo['home_city'].lower() == "st. louis":
@@ -602,12 +653,10 @@ def gui_new_employee(userinfo):
 
     if "reftab_resp" in userinfo and userinfo['reftab_resp'] != "success":
         error = True
-    else:
         modalError = error_modal(
             error=userinfo['mosyle_resp'],
             function="gui_new_employee -> dsmreftab.create_user_reftab"
             )
-        display_modal(modalError)
 
     if "google_resp" in userinfo and userinfo['google_resp'] != "success":
         error = True
@@ -625,8 +674,10 @@ def gui_term_employee(userinfo):
     Runs all the termination functions from each platform
     userinfo    dict    user object
     """
-    dsmreftab.terminate_user(userinfo)
+    devices = dsmreftab.terminate_user(userinfo)
+    device_list_modal(devices)
     password = dsmgoogle.terminate_user(userinfo)[1]
+
     return password
 
 
@@ -674,7 +725,8 @@ def main(userinfo=userinfo):
             except KeyError:
                 result = gui_new_employee(userinfo)
                 clear_new_emp_fields(windowNew)
-                window['log'].update(value=result)
+                window['log'].update(value='Success')
+                window.read(timeout=0)
         elif event == 'btnTerm' and not windowTerm and not windowNew:
             windowMain.disappear()
             windowTerm = term_employee_window()

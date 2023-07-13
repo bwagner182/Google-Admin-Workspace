@@ -113,6 +113,14 @@ def get_loans(userid=None, loan_id=None):
         sys.exit("Unable to retrieve loans")
 
 
+def loan_device_list(loans):
+    devices = []
+    for loan in loans:
+        devices.append(loan['title'])
+
+    return devices
+
+
 def get_asset(asset_id):
     """
     Get the asset object from the Reftab API
@@ -156,8 +164,7 @@ def terminate_user(userinfo):
     username    str     username of the employee (ex: jsmith)
 
     Return (None)
-    response    dict    this is the response from the API when updating the asset
-                        (not the loan due date, but the due date will be shown on success)
+    response    list    return the names of the devices on loan to the user
     """
     user = search_users(userinfo['username'])
 
@@ -179,13 +186,14 @@ def terminate_user(userinfo):
             user = search_users(userinfo['email_address'])[0]
 
     try:
-        userid = user['lnid']
+        loans = get_loans(loan_id=user['lnid'])
     except KeyError:
-        userid = user['uid']
+        loans = get_loans(userid=user['uid'])
 
-    loans = get_loans(userid=userid)
     try:
+        devices = []
         for loan in loans:
+            devices.append(loan['title'])
             category = loan['categoryName']
             if "MacBook" in category or "iMac" in category:
                 loan_id = loan['lid']
@@ -195,8 +203,10 @@ def terminate_user(userinfo):
 
             if "iMac" in category:
                 status = "in"
+                asset_id = loan['aid']
             else:
                 status = "out"
+
     except TypeError:
         print("Sorry, no registered devices for this user")
         # exit the function and move on
@@ -223,6 +233,8 @@ def terminate_user(userinfo):
 
     if userinfo['test_mode'] is False:
         response = update_asset_status(asset, "term")
+    else:
+        response = ""
 
     if response != "error":
         print("User's device has been updated in Reftab")
@@ -231,4 +243,4 @@ def terminate_user(userinfo):
         print("assigned devices in reftab")
 
     # Uncomment for debugging purposes or to see the asset response
-    # return response
+    return devices
