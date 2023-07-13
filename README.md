@@ -62,6 +62,12 @@ status label to mark the laptop "Needs to be shipped home". Once the process
 has completed, the new password for the ex-employee's Google Workspace account
 will be printed to the terminal window.
 
+#### Device List
+
+When using the "Term Employee" option through the GUI, you should now receive a
+list of devices which are assigned to the employee. These devices should be 
+collected by the terminating manager when the employee is released.
+
 ### GUI
 
 run the script with the `gui` argument to run the program with a proper GUI
