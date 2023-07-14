@@ -490,6 +490,8 @@ def gui_check_title(window, userinfo):
                 userinfo['title_short'] = "ae"
             case "business developer":
                 userinfo['title_short'] = "bd"
+            case "chief operating officer":
+                userinfo['title_short'] = "coo"
             case "community manager":
                 userinfo['title_short'] = "cm"
             case "copywriter":
@@ -675,7 +677,8 @@ def gui_term_employee(userinfo):
     userinfo    dict    user object
     """
     devices = dsmreftab.terminate_user(userinfo)
-    device_list_modal(devices)
+    if devices is not "":
+        device_list_modal(devices)
     password = dsmgoogle.terminate_user(userinfo)[1]
 
     return password

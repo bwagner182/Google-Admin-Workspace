@@ -209,8 +209,9 @@ def terminate_user(userinfo):
 
     except TypeError:
         print("Sorry, no registered devices for this user")
+        devices = ""
         # exit the function and move on
-        return
+        return devices
 
     # Update device due date to TOMORROW at 5PM
     due_date = datetime.datetime.today() + datetime.timedelta(days=1)
