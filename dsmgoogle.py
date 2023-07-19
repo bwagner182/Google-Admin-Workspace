@@ -575,7 +575,7 @@ def create_user_google(userinfo):
                     userinfo['org_unit'] = userinfo['org_unit'] + "/Community Manager"
                 case "cw":
                     # Add user to drivestl.com>Tampa>Copywriter OU
-                    userinfo['org_unit'] = userinfo['org_unit'] + "/Copywriter"
+                    userinfo['org_unit'] = userinfo['org_unit'] + "/Copywriters"
                     # Add user to userinfo['groups']
                     userinfo['groups'].append("01ci93xb40oqui1")
                     userinfo['groups'].append("03o7alnk2gh07zy")
