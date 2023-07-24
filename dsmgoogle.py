@@ -547,6 +547,7 @@ def create_user_google(userinfo):
         case "tpa":
             userinfo['org_unit'] = userinfo['org_unit'] + "/Tampa"
             userinfo['groups'].append("04i7ojhp0rm8evs")
+            userinfo['groups'].append("03oy7u293euadyx")
             match userinfo['title_short'].lower():
                 case "aae":
                     # Add user to drivestl.com>Tampa>Account Executive OU
