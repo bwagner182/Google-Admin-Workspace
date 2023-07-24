@@ -652,11 +652,14 @@ def gui_new_employee(userinfo):
 
     if "mosyle_resp" in userinfo and userinfo['mosyle_resp'] != "success":
         error = True
-
+        modalError = error_modal(
+            error=userinfo['mosyle_resp'],
+            function="gui_new_employee -> dsmreftab.create_user_mosyle"
+            )
     if "reftab_resp" in userinfo and userinfo['reftab_resp'] != "success":
         error = True
         modalError = error_modal(
-            error=userinfo['mosyle_resp'],
+            error=userinfo['reftab_resp'],
             function="gui_new_employee -> dsmreftab.create_user_reftab"
             )
 
