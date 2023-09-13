@@ -547,6 +547,7 @@ def create_user_google(userinfo):
         case "tpa":
             userinfo['org_unit'] = userinfo['org_unit'] + "/Tampa"
             userinfo['groups'].append("04i7ojhp0rm8evs")
+            userinfo['groups'].append("03oy7u293euadyx")
             match userinfo['title_short'].lower():
                 case "aae":
                     # Add user to drivestl.com>Tampa>Account Executive OU
@@ -575,7 +576,7 @@ def create_user_google(userinfo):
                     userinfo['org_unit'] = userinfo['org_unit'] + "/Community Manager"
                 case "cw":
                     # Add user to drivestl.com>Tampa>Copywriter OU
-                    userinfo['org_unit'] = userinfo['org_unit'] + "/Copywriter"
+                    userinfo['org_unit'] = userinfo['org_unit'] + "/Copywriters"
                     # Add user to userinfo['groups']
                     userinfo['groups'].append("01ci93xb40oqui1")
                     userinfo['groups'].append("03o7alnk2gh07zy")
@@ -791,11 +792,15 @@ def create_user_google(userinfo):
                     userinfo['org_unit'] = userinfo['org_unit'] + "/Business Developer"
                     # Add user to userinfo['groups']
                     userinfo['groups'].append("048pi1tg1lpbz8e")
+                case "coo":
+                    userinfo['org_unit'] = userinfo['org_unit'] + "/Chief Operating Officer"
                 case "cw":
                     # Add user to drivestl.com>Dallas>Copywriter OU
                     userinfo['org_unit'] = userinfo['org_unit'] + "/Copywriter"
                     # Add user to userinfo['groups']
                     userinfo['groups'].append("03o7alnk2gh07zy")
+                case "dam":
+                    userinfo['org_unit'] = userinfo['org_unit'] + "/Director of Analytics"
                 case "am":
                     # Add user to drivestl.com>Dallas>Digital Analyst OU
                     userinfo['org_unit'] = userinfo['org_unit'] + "/Digital Analyst"
@@ -814,7 +819,11 @@ def create_user_google(userinfo):
                     # Add user to drivestl.com>Dallas>Project Manager OU
                     userinfo['org_unit'] = userinfo['org_unit'] + "/Project Manager"
                     # Add user to userinfo['groups']
-                    
+                case "vpa":
+                    userinfo['org_unit'] = userinfo['org_unit'] + "/vice President of Analytics"
+                case "web":
+                    userinfo['org_unit'] = userinfo['org_unit'] + "/Web Developer"
+
         case _:
             print("New office? Contact the developer to have it added to the app.")
             print("Location entered: " + userinfo['home_city'])

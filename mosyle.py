@@ -56,12 +56,17 @@ def create_user_mosyle(userinfo):
 
         # Make sure there are no other errors with the submission
         if response['status'] != 'OK':
-            userinfo['mosyle_resp'] = "fail"
+            userinfo['mosyle_resp'] = response['message']
+            print("Error creating user account in Mosyle: \n" + userinfo['mosyle_resp'] )
             return userinfo
         else:
             # User successfully created
-            print("Mosyle user creation SUCCESS")
-            userinfo['mosyle_resp'] = "success"
+            if response['response'][0]['status'] == "USER_CREATED":
+                print("Mosyle user creation SUCCESS")
+                userinfo['mosyle_resp'] = "success"
+            else:
+                print(response['response'][0]['status'])
+                userinfo['mosyle_resp'] = response['response'][0]['status']
             return userinfo
 
     elif userinfo['test_mode'] is True:
