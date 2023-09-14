@@ -275,7 +275,7 @@ def update_manager(userinfo):
     except KeyError:
         manager_new = None
 
-    if manager_old is None and manager_new is not None:
+    if manager_new is not None and manager_old != manager_new:
         user['details']['Manager'] = manager_new
 
         try:
