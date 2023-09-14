@@ -240,6 +240,18 @@ def term_employee_window():
                 pad=(5, 10),
                 font=("Roboto", 20)
             ),
+            gui.Text(
+                text="Manager Email",
+                size=(12, 1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='manager',
+                focus=False,
+                pad=(5,10),
+                font=("Roboto", 20)
+            )
         ],
 
         [
@@ -405,6 +417,7 @@ def clear_term_emp_fields(window):
     window['fname'].Update('')
     window['lname'].Update('')
     window['email'].Update('')
+    window['manager'].Update('')
 
 
 def gui_new_employee_values(values, userinfo):
@@ -442,6 +455,7 @@ def gui_term_employee_values(values, userinfo):
     userinfo['fname'] = values['fname']
     userinfo['lname'] = values['lname']
     userinfo['email_address'] = values['email']
+    userinfo['manager'] = values['manager']
     return userinfo
 
 
@@ -680,6 +694,7 @@ def gui_term_employee(userinfo):
     userinfo    dict    user object
     """
     devices = dsmreftab.terminate_user(userinfo)
+    dsmreftab.update_manager(userinfo)
     if devices is not "":
         device_list_modal(devices)
     password = dsmgoogle.terminate_user(userinfo)[1]
