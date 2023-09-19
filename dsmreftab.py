@@ -270,9 +270,9 @@ def update_manager(userinfo):
     except KeyError:
         manager_old = None
 
-    try:
+    if userinfo['manager'] is not None and userinfo['manager'] != '':
         manager_new = userinfo['manager']
-    except KeyError:
+    else:
         manager_new = None
 
     if manager_new is not None and manager_old != manager_new:
