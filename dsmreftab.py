@@ -6,7 +6,7 @@ better testing and code readability
 from reftab import ReftabClient
 
 from pprint import pprint
-from datetime import datetime
+import datetime
 import os
 import sys
 
@@ -60,7 +60,7 @@ def create_user_reftab(userinfo):
         return userinfo
 
 
-def search_users(username):
+def search_users(userinfo):
     """
     Seach Reftab for user account by username
     username    str     any query, but username or email is best
@@ -69,14 +69,18 @@ def search_users(username):
     response    list    an array of user objects that match the search
     """
     try:
-        response = client.get('loanees', query=username, limit=1)
+        response = client.get('loanees', query=userinfo['username'], limit=0)
     except:
-        print("Error retrieving user search")
-        sys.exit()
+        response = client.get('loanees', query=userinfo['email_address'], limit=0)
 
     if len(response) < 1:
         print("No users by that username")
     else:
+        for user in response:
+            if user['email'] != userinfo['email_address']:
+                continue
+            elif user['email'] == userinfo['email_address']:
+                response = user
         return response
 
 
@@ -113,6 +117,14 @@ def get_loans(userid=None, loan_id=None):
         sys.exit("Unable to retrieve loans")
 
 
+def loan_device_list(loans):
+    devices = []
+    for loan in loans:
+        devices.append(loan['title'])
+
+    return devices
+
+
 def get_asset(asset_id):
     """
     Get the asset object from the Reftab API
@@ -143,7 +155,9 @@ def update_asset_status(asset, status):
             'name': 'Needs shipped home'
         }
         asset['statid'] = 65952  # ID for status label in Reftab
-    response = client.put('assets', asset['aid'], body=asset)
+        response = client.put('assets', asset['aid'], body=asset)
+    else:
+        response = "error"
     return response
 
 
@@ -154,36 +168,40 @@ def terminate_user(userinfo):
     username    str     username of the employee (ex: jsmith)
 
     Return (None)
-    response    dict    this is the response from the API when updating the asset
-                        (not the loan due date, but the due date will be shown on success)
+    response    list    return the names of the devices on loan to the user
     """
-    user = search_users(userinfo['username'])
+    user = search_users(userinfo)
 
-    if len(user) > 1:
-        sys.exit("Multiple users match that search, please provide the unique username")
-    elif len(user) == 0:
-        sys.exit("No users matched the search, please correct the username")
-    else:
-        user = user[0]
+    # if len(users) > 1:
+    #     for user in users:
+    #         if user['email'] != userinfo['email_address']:
+    #             continue
+    #         elif user['email'] == userinfo['email_address']:
+    #             users = user
+    # elif len(user) == 0:
+    #     sys.exit("No users matched the search, please correct the username")
+    # else:
+    #     user = user[0]
 
-    if user['name'].lower() != userinfo['fname'].lower() + " " + userinfo['lname'].lower():
-        os.system("clear")
-        print("The user account returned does not match, try searching by email? (y/n)")
-        answer = input().strip().lower()
+    # if user['name'].lower() != userinfo['fname'].lower() + " " + userinfo['lname'].lower():
+    #     os.system("clear")
+    #     print("The user account returned does not match, try searching by email? (y/n)")
+    #     answer = input().strip().lower()
 
-        if answer == "n":
-            sys.exit("User account returned did not match given name")
-        elif answer == "y":
-            user = search_users(userinfo['email_address'])[0]
+    #     if answer == "n":
+    #         sys.exit("User account returned did not match given name")
+    #     elif answer == "y":
+    #         user = search_users(userinfo)[0]
 
     try:
-        userid = user['lnid']
+        loans = get_loans(loan_id=user['lnid'])
     except KeyError:
-        userid = user['uid']
+        loans = get_loans(userid=user['uid'])
 
-    loans = get_loans(userid=userid)
     try:
+        devices = []
         for loan in loans:
+            devices.append(loan['title'])
             category = loan['categoryName']
             if "MacBook" in category or "iMac" in category:
                 loan_id = loan['lid']
@@ -193,15 +211,20 @@ def terminate_user(userinfo):
 
             if "iMac" in category:
                 status = "in"
+                asset_id = loan['aid']
             else:
                 status = "out"
+
     except TypeError:
         print("Sorry, no registered devices for this user")
+        devices = ""
         # exit the function and move on
-        return
+        return devices
 
-    # Update device due date to TODAY at 5PM
-    due_date = datetime.today().strftime('%Y-%m-%d') + "T22:00:00Z"
+    # Update device due date to TOMORROW at 5PM
+    due_date = datetime.datetime.today() + datetime.timedelta(days=1)
+    due_date = due_date.strftime('%Y-%m-%d')
+    due_date = due_date + "T22:00:00Z"
     # Update device status to "Needs shipped home"
 
     body = {
@@ -219,8 +242,45 @@ def terminate_user(userinfo):
 
     if userinfo['test_mode'] is False:
         response = update_asset_status(asset, "term")
+    else:
+        response = ""
 
-    print("User's device has been updated in Reftab")
+    if response != "error":
+        print("User's device has been updated in Reftab")
+    else:
+        print("There was an issue, I'm sorry. Please check the user and")
+        print("assigned devices in reftab")
 
-    # Uncomment for debugging purposes or to see the asset response
-    # return response
+    return devices
+
+def get_manager(userinfo):
+    user = search_users(userinfo)
+    try:
+        if user['details']['Manager'] is not None:
+            manager = user['details']['Manager']
+    except KeyError:
+        manager = None
+
+    return manager
+
+def update_manager(userinfo):
+    user = search_users(userinfo)
+    try:
+        manager_old = user['details']['Manager']
+    except KeyError:
+        manager_old = None
+
+    if userinfo['manager'] is not None and userinfo['manager'] != '':
+        manager_new = userinfo['manager']
+    else:
+        manager_new = None
+
+    if manager_new is not None and manager_old != manager_new:
+        user['details']['Manager'] = manager_new
+
+        try:
+            response = client.put('subusers', str(user['uid']), user)
+            return response
+        except:
+            userinfo['reftab_resp'] = "Error updating user"
+            return userinfo

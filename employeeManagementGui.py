@@ -1,10 +1,13 @@
 import PySimpleGUI as gui
 import pandas as pd
 # from employeeManagement import new_employee, term_employee
-from pprint import pprint
-import dsmreftab, dsmgoogle, mosyle
+import dsmgoogle
+import dsmreftab
+import mosyle
 import os.path
-import base64
+
+from pprint import pprint
+
 
 userinfo = dict()
 userinfo['test_mode'] = False
@@ -14,11 +17,11 @@ gui.theme('DarkBlack1')
 
 def build_main_window():
     """Build the main window
-    
+
     Builds out the main window for user management
-    Allows the user to select which main function they will 
+    Allows the user to select which main function they will
     be using
-    
+
     Returns:
         windowMain: window object
     """
@@ -98,7 +101,7 @@ def new_employee_window():
                 size=(16, 1),
                 key='fname',
                 focus=True,
-                pad=(5,10),
+                pad=(5, 10),
                 font=("Roboto", 20)
             ),
             gui.Text(
@@ -110,14 +113,14 @@ def new_employee_window():
                 size=(16, 1),
                 key='lname',
                 focus=False,
-                pad=(5,10),
+                pad=(5, 10),
                 font=("Roboto", 20)
             )
         ],
         [
             gui.Text(
                 text="Title",
-                size=(12,1),
+                size=(12, 1),
                 font=("Roboto", 16)
             ),
             gui.Input(
@@ -191,8 +194,7 @@ def term_employee_window():
     layoutTerm = [
         [
             gui.Text(
-                text="Fill in the fields to lock employee out \
-                of their accounts.",
+                text="Fill in the fields to lock employee out of their accounts.",
                 auto_size_text=True,
                 size=(60, 2),
                 expand_x=True,
@@ -228,16 +230,28 @@ def term_employee_window():
         [
             gui.Text(
                 text="Email address",
-                size=(12,1),
+                size=(12, 1),
                 font=("Roboto", 16)
             ),
             gui.Input(
                 size=(16, 1),
                 key='email',
                 focus=False,
-                pad=(5,10),
+                pad=(5, 10),
                 font=("Roboto", 20)
             ),
+            gui.Text(
+                text="Manager Email",
+                size=(12, 1),
+                font=("Roboto", 16)
+            ),
+            gui.Input(
+                size=(16, 1),
+                key='manager',
+                focus=False,
+                pad=(5,10),
+                font=("Roboto", 20)
+            )
         ],
 
         [
@@ -288,6 +302,96 @@ def term_employee_window():
     return windowTerm
 
 
+def error_modal(error, function):
+    layoutError = [
+        [
+            gui.Text(
+                text=error,
+                size=(60, 3),
+                font=("Roboto", 18),
+                pad=(15, 15),
+                auto_size_text=True,
+                expand_x=True,
+                expand_y=True
+            )
+        ],
+        [
+            gui.Button(
+                button_text="Close",
+                enable_events=True,
+                border_width=5,
+                key="modalClose",
+                font=("Roboto", 18),
+                pad=(10, 20),
+                visible=True,
+                button_color="red"
+            )
+        ]
+    ]
+
+    modal = gui.Window(
+        title="Error from " + function,
+        layout=layoutError,
+        margins=(10, 10),
+        finalize=True
+    )
+
+    while modal:
+        event, values = modal.read()
+
+        if event == 'modalClose':
+            modal.close()
+            modal = None
+    return
+
+
+def device_list_modal(devices):
+    text = ""
+    for device in devices:
+        text = text + device + "\n"
+
+    layoutDeviceList = [
+        [
+            gui.Text(
+                text=text,
+                size=(60, 3),
+                font=("Roboto", 18),
+                pad=(15, 15),
+                auto_size_text=True,
+                expand_x=True,
+                expand_y=True
+            )
+        ],
+        [
+            gui.Button(
+                button_text="Close",
+                enable_events=True,
+                border_width=5,
+                key="devicesClose",
+                font=("Roboto", 18),
+                pad=(10, 20),
+                visible=True,
+                button_color="red"
+            )
+        ]
+    ]
+
+    deviceModal = gui.Window(
+        title="Devices loaned to employee",
+        layout=layoutDeviceList,
+        margins=(10, 10),
+        finalize=True
+    )
+
+    while deviceModal:
+        event, values = deviceModal.read()
+
+        if event == 'devicesClose':
+            deviceModal.close()
+            deviceModal = None
+    return
+
+
 def clear_new_emp_fields(window):
     """Clears the fields in the new employee window
 
@@ -313,6 +417,7 @@ def clear_term_emp_fields(window):
     window['fname'].Update('')
     window['lname'].Update('')
     window['email'].Update('')
+    window['manager'].Update('')
 
 
 def gui_new_employee_values(values, userinfo):
@@ -343,13 +448,14 @@ def gui_term_employee_values(values, userinfo):
     Args:
         values (dict): from the window input fields
         userinfo (dict): stored user data
-    
+
     Returns:
         dict: stored user data for later use
     """
     userinfo['fname'] = values['fname']
     userinfo['lname'] = values['lname']
     userinfo['email_address'] = values['email']
+    userinfo['manager'] = values['manager']
     return userinfo
 
 
@@ -364,8 +470,9 @@ def gui_check_name(userinfo):
     """
 
     userinfo['username'] = userinfo['fname'][0].lower() +\
-        userinfo['lname'].lower().replace('\'', '')
-    userinfo['username'] = userinfo['username'].strip()
+        userinfo['lname'].lower()
+
+    userinfo['username'] = userinfo['username'].strip().replace('\'', '')
 
     if userinfo['username'].find(" ") >= 0:
         userinfo['username'] = userinfo['username'].replace(" ", "")
@@ -397,6 +504,8 @@ def gui_check_title(window, userinfo):
                 userinfo['title_short'] = "ae"
             case "business developer":
                 userinfo['title_short'] = "bd"
+            case "chief operating officer":
+                userinfo['title_short'] = "coo"
             case "community manager":
                 userinfo['title_short'] = "cm"
             case "copywriter":
@@ -452,10 +561,19 @@ def gui_check_title(window, userinfo):
             case "finance":
                 userinfo['title_short'] = "fin"
             case _:
-                window['log'].update(value="Unable to recognize the employee's title. Please fix or alert the developer")
-                window['title'].Update(background_color="red", text_color="white", select=True)
+                window['title'].Update(
+                    background_color="red",
+                    text_color="white",
+                    select=True
+                    )
+                window['log'].Update("Error")
+                window.read(timeout=0)
+                error_modal(
+                    error="Unable to recognize the employee's title. Please \
+                        fix or alert the developer",
+                    function="gui_check_title"
+                    )
                 userinfo['error'] = True
-
     else:
         userinfo['title_short'] = userinfo['title']
 
@@ -485,26 +603,40 @@ def gui_check_city(window, userinfo):
                 userinfo['city'] = "nsh"
             case "nash":
                 userinfo['city'] = "nsh"
+            case "dallas":
+                userinfo['city'] = "dal"
+            case "remote":
+                userinfo['city'] = "rem"
             case _:
-                window['log'].Update(value="Unable to recognize the employee's home city. Consult the application developer and give them the error below.")
-                window['home_city'].Update(background_color="red", text_color="white", select=True)
-                userinfo['error'] = True
-    else:
-        match userinfo['home_city'].lower():
-            case "atl" | "stl" | "nsh" | "mia" | "tpa":
-                None
-            case _:
-                window['log'].Update(
-                    value="Invalid city entered. Please enter a current Drive\
-                    office location."
-                    )
                 window['home_city'].Update(
                     background_color="red",
                     text_color="white",
                     select=True
                     )
+                window['log'].Update("Error")
+                window.read(timeout=0)
                 userinfo['error'] = True
-        userinfo['city'] = userinfo['home_city']
+                error_modal(
+                    error="Unable to recognize the employee's home city. Please fix or consult the developer.",
+                    function="gui_check_city"
+                    )
+    else:
+        match userinfo['home_city'].lower():
+            case "atl" | "stl" | "nsh" | "mia" | "tpa" | "dal" | "rem":
+                userinfo['city'] = userinfo['home_city']
+            case _:
+                window['home_city'].Update(
+                    background_color="red",
+                    text_color="white",
+                    select=True
+                    )
+                window['log'].Update("Error")
+                window.read(timeout=0)
+                userinfo['error'] = True
+                error_modal(
+                    error="Unable to recognize the employee's home city. Please fix or consult the developer.",
+                    function="gui_check_city"
+                    )
 
     if userinfo['home_city'].lower() == "stl" or \
             userinfo['home_city'].lower() == "st. louis":
@@ -534,9 +666,16 @@ def gui_new_employee(userinfo):
 
     if "mosyle_resp" in userinfo and userinfo['mosyle_resp'] != "success":
         error = True
-
+        modalError = error_modal(
+            error=userinfo['mosyle_resp'],
+            function="gui_new_employee -> dsmreftab.create_user_mosyle"
+            )
     if "reftab_resp" in userinfo and userinfo['reftab_resp'] != "success":
         error = True
+        modalError = error_modal(
+            error=userinfo['reftab_resp'],
+            function="gui_new_employee -> dsmreftab.create_user_reftab"
+            )
 
     if "google_resp" in userinfo and userinfo['google_resp'] != "success":
         error = True
@@ -554,8 +693,12 @@ def gui_term_employee(userinfo):
     Runs all the termination functions from each platform
     userinfo    dict    user object
     """
-    dsmreftab.terminate_user(userinfo)
+    dsmreftab.update_manager(userinfo)
+    devices = dsmreftab.terminate_user(userinfo)
+    if devices is not "":
+        device_list_modal(devices)
     password = dsmgoogle.terminate_user(userinfo)[1]
+
     return password
 
 
@@ -603,7 +746,8 @@ def main(userinfo=userinfo):
             except KeyError:
                 result = gui_new_employee(userinfo)
                 clear_new_emp_fields(windowNew)
-                window['log'].update(value=result)
+                window['log'].update(value='Success')
+                window.read(timeout=0)
         elif event == 'btnTerm' and not windowTerm and not windowNew:
             windowMain.disappear()
             windowTerm = term_employee_window()
