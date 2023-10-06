@@ -698,7 +698,8 @@ def gui_term_employee(userinfo):
     if devices is not "":
         device_list_modal(devices)
     password = dsmgoogle.terminate_user(userinfo)[1]
-
+    salesforce = dsmSalesforce.terminate_user(userinfo)
+    
     return password
 
 
