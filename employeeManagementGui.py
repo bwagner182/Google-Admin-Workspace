@@ -3,6 +3,7 @@ import pandas as pd
 # from employeeManagement import new_employee, term_employee
 import dsmgoogle
 import dsmreftab
+import dsmSalesforce
 import mosyle
 import os.path
 
@@ -699,7 +700,7 @@ def gui_term_employee(userinfo):
         device_list_modal(devices)
     password = dsmgoogle.terminate_user(userinfo)[1]
     salesforce = dsmSalesforce.terminate_user(userinfo)
-    
+
     return password
 
 
