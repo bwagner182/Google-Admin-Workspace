@@ -1,6 +1,5 @@
 import keys
 from salesforce_api import Salesforce
-import requests
 
 
 client = Salesforce(username=keys.SF_USERNAME_PROD,
@@ -8,14 +7,15 @@ client = Salesforce(username=keys.SF_USERNAME_PROD,
                     security_token=keys.SF_TOKEN_PROD
                     )
 
+
 def get_user(email_address):
     """query the Salesforce database
-    
+
     searches the Salesforce users for the email address given
-    
+
     Args:
         email_address (string): email address of the terminated user
-    
+
     Returns:
         dict: user object from Salesforce
     """
@@ -23,14 +23,15 @@ def get_user(email_address):
 
     return user
 
+
 def deactivate_user(user):
     """deactivate the user
-    
+
     set's the user's "IsActive" flag to False
-    
+
     Args:
         user (dict): user object from Salesforce
-    
+
     Returns:
         boolean: result of the deactivation call
     """
@@ -38,14 +39,16 @@ def deactivate_user(user):
 
     return response
 
+
 def terminate_user(userinfo):
     """terminate user
-    
+
     wraps the get and deactivate fundtions to one call
-    
+
     Args:
-        userinfo (dict): information from the terminated user. email_address required
-    
+        userinfo (dict): information from the terminated user. 
+            -- email_address required
+
     Returns:
         boolean: result of the deactivation
     """
