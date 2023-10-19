@@ -284,3 +284,21 @@ def update_manager(userinfo):
         except:
             userinfo['reftab_resp'] = "Error updating user"
             return userinfo
+
+def all_loans():
+    loans = []
+    offset = 0
+    more = True
+    while more:
+        results = client.get("loans", offset=offset)
+        if results:
+            for loan in results:
+                loans.append(loan)
+            if len(results) == 20:
+                offset += len(client.get("loans", offset=offset))
+            elif len(results) < 20:
+                more = None
+        else:
+            more = None
+    return loans
+

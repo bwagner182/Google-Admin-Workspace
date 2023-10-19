@@ -79,7 +79,10 @@ class ReftabClient():
             if (limit):
                 endpoint += '&limit=' + str(limit)
             if (offset):
-                endpoint += '&offset' + str(offset)
+                endpoint += '&offset=' + str(offset)
+        elif endpoint == "loans":
+            if (offset):
+                endpoint += "?offset=" + str(offset)
   
         return self.__request('GET', endpoint)
         
